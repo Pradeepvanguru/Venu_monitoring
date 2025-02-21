@@ -1,0 +1,69 @@
+/* Add styling for the TeamLeadAuth component */
+.team-lead-auth {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.team-lead-auth h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.team-lead-auth input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.team-lead-auth input:focus {
+    outline: none;
+    border-color: #1abc9c; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Soft blue shadow on focus */
+}
+
+.team-lead-auth button {
+    width: 90%;
+    padding: 10px;
+    background-color: #1abc9c;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.team-lead-auth button:hover {
+    background-color: #0056b3;
+}
+
+.toggle-link {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.toggle-link span {
+    color: #007bff;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.toggle-link span:hover {
+    color: #0056b3;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}

@@ -1,0 +1,137 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import { format } from 'date-fns';
+import { ProgressBar as BootstrapProgressBar } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
+import EmployeeSidebar from './EmployeeSidebar'; // Import EmployeeSidebar
+import './EmployeeInterface.css';
+import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is imported
+
+const EmployeeInterface = () => {
+      const { assignEmail} = useParams();
+    const [tasks, setTasks] = useState([]);
+    const [error, setError] = useState('');
+    
+    // Ensure consistency in how you retrieve logged-in user's email
+    const loggedInEmail = localStorage.getItem('loggedInEmail');
+
+    // Function to fetch tasks assigned to the logged-in employee
+    const fetchEmployeeTasks = useCallback(async () => {
+    if (!loggedInEmail) {
+        console.error('Error: No logged-in email found');
+        setError('No logged-in email found. Please log in again.');
+        return;
+    }
+
+    try {
+        const res = await axios.get(`http://localhost:5000/api/employee-tasks?email=${loggedInEmail}`);
+        const fetchedTasks = res.data;
+        console.log(fetchedTasks);
+
+        // Filter tasks based on the assigned email
+        const assignedTasks = fetchedTasks.filter(task => task.assignEmail === loggedInEmail);
+
+        const updatedTasks = await Promise.all(
+            assignedTasks.map(async (task) => {
+                try {
+                    const storedProgress = localStorage.getItem(`progress-${task._id}`);
+                    const totalDays = Math.ceil(
+                        (new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24),
+                        console.log(task.endDate)
+                    );
+                    const countRes = await axios.get(`http://localhost:5000/api/data/${loggedInEmail}/count`);
+                    const submissionCount = countRes.data.count;
+                    const calculatedProgress = (submissionCount / totalDays) * 100 || 0;
+                    const progress = storedProgress ? Number(storedProgress) : calculatedProgress;
+
+                    return {
+                        ...task,
+                        progress: Math.min(progress, 100),
+                    };
+                } catch (error) {
+                    console.error(`Error fetching submission count for ${task.assignEmail}:`, error);
+                    return task;
+                }
+            })
+        );
+
+        setTasks(updatedTasks);
+    } catch (err) {
+        console.error('Error fetching tasks:', err.response ? err.response.data : err.message);
+        setError('Error fetching tasks');
+    }
+}, [loggedInEmail]);
+
+
+    // Save progress in localStorage when it changes
+    const saveProgress = (taskId, progress) => {
+        localStorage.setItem(`progress-${taskId}`, progress);
+    };
+
+    // Fetch tasks on component mount
+    useEffect(() => {
+        fetchEmployeeTasks();
+    }, [fetchEmployeeTasks]);
+
+    // 'Claim Task' button handler (dummy functionality for now)
+    const handleClaimTask = (taskId) => {
+        console.log(`Claim Task clicked for Task ID: ${taskId}`);
+    };
+
+    return (
+        <div className="employee-interface">
+            <EmployeeSidebar />
+            <div className="content-wrapper">
+                <h2 className="module-heading">My Tasks</h2>
+
+                {error && <div className="alert alert-danger">{error}</div>}
+
+                <div className="todo-list">
+                    {tasks.length > 0 ? (
+                        <ul className="list-group">
+                            {tasks.map((task) => {
+                                const progress = task.progress ?? 0;
+                                saveProgress(task._id, progress);
+
+                                const formattedStartDate = format(new Date(task.startDate), 'dd MMM yyyy');
+                                const formattedEndDate = format(new Date(task.endDate), 'dd MMM yyyy');
+
+                                return (
+                                    <li key={task._id} className="list-group-item task-item">
+                                        <div className="task-card">
+                                            <div className="task-details">
+                                                <h4 className="task-name">{task.taskName}</h4>
+                                                <p className="task-date">
+                                                    <strong>Assigned to mail:</strong> {task.assignEmail}
+                                                </p>
+                                                <p className="task-date">
+                                                    <strong>Start Date:</strong> {formattedStartDate}
+                                                </p>
+                                                <p className="task-date">
+                                                    <strong>Deadline:</strong> {formattedEndDate}
+                                                </p>
+                                            </div>
+                                            <div className="task-progress">
+                                                <p><b>Task Progress:</b></p>
+                                                <BootstrapProgressBar now={progress} label={`${Math.round(progress)}%`} />
+                                            </div>
+                                            <button
+                                                onClick={() => handleClaimTask(task._id)}
+                                                className="btn btn-primary btn-sm">
+                                                Claim Task
+                                            </button>
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p>No tasks available</p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default EmployeeInterface;

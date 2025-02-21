@@ -1,0 +1,103 @@
+/* Navbar.css */
+
+/* Overall Navbar Styling */
+.navbar {
+    margin: 1px;
+    background-color: #1f2937; /* Dark background for navbar */
+    color: #fff; /* White text for contrast */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Logo Styling */
+.navbar-logo a {
+    color: #fff; /* Light Peach Color for the logo */
+    font-size: 1.8rem;
+    font-weight: bold;
+    font-family: 'Merriweather', serif;
+    text-decoration: none;
+    padding:50px;
+}
+
+/* Navbar Links */
+.navbar-links {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+}
+
+.navbar-links a {
+    color: #fff;
+    margin-left: 1.5rem;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+    color: #fd0606; /* Light Peach Color on hover */
+}
+
+/* Dropdown Styling */
+.navbar-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: 1.5rem;
+    cursor: pointer;
+}
+
+.navbar-dropdown span {
+    color: #fff;
+    font-size: 1rem;
+    text-decoration: none;
+    margin-right: 20px;
+    
+}
+
+.dropdown-content {
+    display: none; /* Hidden by default */
+    position: absolute;
+    background-color: #e7ecf1;
+    min-width: 150px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    border-radius: 4px;
+    
+    
+}
+
+.dropdown-content a {
+    color: #333; /* Dark text color inside dropdown */
+    padding: 10px ;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.dropdown-content a:hover {
+    background-color: #fff; /* Light peach hover effect */
+}
+
+.navbar-dropdown:hover .dropdown-content {
+    display: block; /* Show dropdown when hovering */
+}
+
+/* Logout Button */
+.logout-btn {
+    background-color: #ff6b6b; /* Red for logout button */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 1.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #ff4a4a; /* Darken on hover */
+}

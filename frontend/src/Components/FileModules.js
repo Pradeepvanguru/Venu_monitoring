@@ -1,0 +1,159 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import Sidebar from './Sidebar';
+import './FileModules.css';
+
+const FileModules = () => {
+  const [moduleId, setModuleId] = useState('');
+  const [files, setFiles] = useState([]);
+  const [error, setError] = useState('');
+  const [showInput, setShowInput] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [fileUrl, setFileUrl] = useState('');
+
+  const handleSearchClick = () => {
+    setShowInput(true);
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (moduleId) {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_URL}/api/files/${moduleId}`);
+        setFiles(response.data.files);
+        setError('');
+      } catch (err) {
+        console.error('Error fetching files:', err.response ? err.response.data : err.message);
+        setError('No files uploaded for this ID.');
+        setFiles([]);
+      }
+    }
+  };
+
+  const handleDownload = async (moduleId, dayIndex) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_URL}/api/download-file/${moduleId}/${dayIndex}`, {
+        method: 'GET',
+      });
+
+      if (response.status === 200) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const contentDisposition = response.headers.get('content-disposition');
+        let filename = `Module-${moduleId}_Day-${dayIndex}`;
+
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+)"/);
+          if (match) {
+            filename = match[1];
+          }
+        }
+
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert('Failed to download file.');
+      }
+    } catch (error) {
+      alert(`Error downloading file: ${error.message}`);
+    }
+  };
+
+  const handlePreview = async (moduleId, dayIndex) => {
+    const url = `${process.env.REACT_APP_URL}/api/view-file/${moduleId}/${dayIndex}`;
+    setFileUrl(url);
+    setShowPreview(true);
+  };
+
+  const closePreview = () => {
+    setShowPreview(false);
+    setFileUrl('');
+  };
+
+  // Limit files to 10 items
+  const limitedFiles = files.slice(0, 10);
+
+  return (
+    <div className="team-lead-interface">
+      <Sidebar />
+      <main className="main-content">
+        <h1>File Modules</h1>
+        <p>Manage and review files and modules here.</p>
+
+        {!showInput ? (
+          <button onClick={handleSearchClick} className="btn btn-primary search-btn">
+            Search Files by Module ID
+          </button>
+        ) : (
+          <form onSubmit={handleSearch} className="search-form">
+            <input
+              type="text"
+              value={moduleId}
+              onChange={(e) => setModuleId(e.target.value)}
+              placeholder="Enter Module ID"
+              className="form-control module-input"
+            />
+            <button type="submit" className="btn btn-primary mt-2" disabled={moduleId === ''}>
+              Submit
+            </button>
+          </form>
+        )}
+
+        {error && <div className="alert alert-danger mt-3 error-message">{error}</div>}
+
+        {limitedFiles.length > 0 && (
+          <div className="files-list mt-3">
+            <h2>Files for Module ID: {moduleId}</h2>
+            <p>Count: {limitedFiles.length} </p> {/* Displaying the file count */}
+            <div className="file-grid">
+              {limitedFiles.map((file, index) => (
+                <div key={index} className="file-item">
+                  <strong>Day {file.dayIndex}</strong>
+                  <div className="button-group">
+                    {/* Download Button with Icon */}
+                    <button
+                      onClick={() => handleDownload(moduleId, file.dayIndex)}
+                      className="btn btn-link"
+                    >
+                      <i className="fas fa-download"></i>
+                    </button>
+                    {/* View Button with Icon */}
+                    <button
+                      onClick={() => handlePreview(moduleId, file.dayIndex)}
+                      className="btn btn-link"
+                    >
+                      <i className="fas fa-eye"></i> 
+                    </button>
+                  </div>
+
+                  {showPreview && (
+                    <div className="preview-overlay">
+                      <div className="preview-modal">
+                        <button onClick={closePreview}>Close</button>
+                        <iframe
+                          src={fileUrl}
+                          width="600"
+                          height="400"
+                          title="File Preview"
+                          style={{ border: 'none' }}
+                        ></iframe>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default FileModules;

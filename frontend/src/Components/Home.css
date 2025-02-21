@@ -1,0 +1,137 @@
+/* Home.css */
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px ;
+    background-color: #f9f9f9;
+    width: 100%;
+  
+}
+
+.home-header {
+    text-align: center;
+    margin-bottom: -20px;
+}
+
+.home-header h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.home-header p {
+    font-size: 1.2rem;
+    font-family: 'Merriweather', serif;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    white-space: nowrap; /* Prevents text from wrapping */
+    overflow: hidden; /* Ensures the text is hidden until it is revealed */
+    border-right: 3px solid #1abc9c; /* Creates the typing cursor effect */
+    width: 0; /* Initial width set to 0 for the animation */
+    animation: typing 6s steps(40, end) 1s infinite, blink 0.0s step-end infinite;
+}
+
+/* Typing animation */
+@keyframes typing {
+    0% {
+        width: 0; /* Start with no text */
+    }
+    50% {
+        width: 100%; /* Full text visible */
+    }
+    75% {
+        width: 100%; /* Pause briefly when fully typed */
+    }
+    100% {
+        width: 0; /* Erase the text */
+    }
+}
+
+/* Blinking cursor animation */
+@keyframes blink {
+    from, to {
+        border-color: transparent;
+    }
+    50% {
+        border-color: #1abc9c;
+    }
+}
+
+.home-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.home-btn {
+    padding: 15px 30px;
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.home-btn:hover {
+    background-color: #16a085;
+    transform: translateY(-5px);
+}
+
+.home-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    margin-top: 40px;
+}
+
+.info-block {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.info-block:hover {
+    transform: translateY(-5px);
+}
+
+.info-block h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.info-block p {
+    font-size: 1rem;
+    color: #666;
+    font-family: 'Merriweather', serif;
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+    .home-header h1 {
+        font-size: 2rem;
+    }
+
+    .home-btn {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+
+    .home-info {
+        grid-template-columns: 1fr;
+    }
+}
