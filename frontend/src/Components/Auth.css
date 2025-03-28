@@ -22,7 +22,7 @@
     border: 1px solid #ccc;
     border-radius: 6px; /* Smoother rounded corners */
     font-size: 1rem;    /* Larger text for readability */
-    background-color: #f9f9f9; /* Light background for inputs */
+    background-color:rgb(102, 104, 106); /* Light background for inputs */
     transition: border-color 0.3s ease; /* Smooth transition for focus state */
 }
 

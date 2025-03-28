@@ -2,12 +2,13 @@
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
+ team_id: { type: String, required: true }, 
   taskName: { type: String, required: true },
   assignEmail: { type: String, required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   taskFile: { type: String, required: true }, // store file path
-  accessKey: String,
+  // accessKey: String,
   moduleId: { type: String, required: true }, // Added moduleId field
   submissions: [{
     filePath: String,

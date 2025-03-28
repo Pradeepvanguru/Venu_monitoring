@@ -8,14 +8,13 @@ import Navbar from './Components/Navbar';
 import TeamLeadAuth from './Components/TeamLeadAuth';
 import EmployeeAuth from './Components/EmployeeAuth';
 import TeamLeadInterface from './Components/TeamLeadInterface';
-
 import EmployeeDashboard from './Components/EmployeeDashboard';
 import CreateTask from './Components/CreateTask';
-
 import FileModules from './Components/FileModules';
 // import Deadlines from './Components/Deadlines';
-import Queries from './Components/Queries';
+import ChatPage from './ChatsComponents/ChatPage';
 import TaskModules from './Components/EmployeeInterface';
+import { ToastContainer } from 'react-toastify';
 
 const App = () => {
     // State for authentication
@@ -42,7 +41,9 @@ const App = () => {
 
     return (
         <NavbarWrapper>
+        <ToastContainer position="top-right" autoClose={3000} />
             <Routes>
+                
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
@@ -55,7 +56,7 @@ const App = () => {
                 <Route path="/file-modules" element={<FileModules />} />
                 <Route path="/task-modules/:moduleId" element={<TaskModules />} />
                 {/* <Route path="/deadlines" element={<Deadlines />} /> */}
-                <Route path="/queries" element={<Queries />} />
+                <Route path="/queries" element={<ChatPage />} />
                 {/* Specific route for employee task by moduleId */}
             </Routes>
         </NavbarWrapper>

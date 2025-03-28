@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './TeamLeadAuth.css';
+import{notification} from "antd"
 
 const TeamLeadAuth = () => {
     const [email, setEmail] = useState('');
@@ -21,15 +21,27 @@ const TeamLeadAuth = () => {
     
         if (isSignup) {
             if (password !== confirmPassword) {
-                alert("Passwords do not match!");
+                notification.error({
+                    message: 'Error',
+                    description: 'Passwords do not match!',
+                });
+                // alert("Passwords do not match!");z
                 return;
             }
             authData.name = name;
             try {
                 const response = await axios.post(`${process.env.REACT_APP_URL}/auth/signup`, authData);
-                alert(response.data.message);
+              
+                notification.success({
+                    message: 'Success',
+                    description: response.data.message,
+                    });
                 setIsSignup(false);
             } catch (error) {
+                notification.error({
+                    message: 'Signup Failed',
+                    description: error.response?.data?.message || 'Something went wrong. Please try again.',
+                });
                 if (error.response && error.response.data) {
                     console.error(error.response.data.message);
                 } else {
@@ -37,12 +49,26 @@ const TeamLeadAuth = () => {
                 }
             }
         } else {
+            
             try {
                 const response = await axios.post(`${process.env.REACT_APP_URL}/auth/login`, authData);
+                
                 localStorage.setItem('userToken', response.data.token);
                 localStorage.setItem('userRole', 'team-lead');
+                localStorage.setItem('login',authData.email)
+                localStorage.setItem("team_id",response.data.team_id)
+                localStorage.setItem('userName',response.data.name);
+                // console.log(("team_id",response.data.team_id))
                 navigate('/team-lead-interface');
+                notification.success({
+                    message: 'Login Successful',
+                    description: 'Welcome back!',
+                });
             } catch (error) {
+                notification.error({
+                    message: 'Login Failed',
+                    description: error.response?.data?.message || 'Invalid email or password!',
+                });
                 if (error.response && error.response.data) {
                     console.error(error.response.data.message);
                 } else {
@@ -54,7 +80,7 @@ const TeamLeadAuth = () => {
     
     return (
         <div className="team-lead-auth">
-            <form onSubmit={handleAuth}>
+              <form onSubmit={handleAuth}>
                 <h2>{isSignup ? 'Team Lead Signup' : 'Team Lead Login'}</h2>
                 {isSignup && (
                     <input
@@ -89,10 +115,71 @@ const TeamLeadAuth = () => {
                     />
                 )}
                 <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
+                
                 <p onClick={switchMode}>
                     {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
                 </p>
             </form>
+
+            <style >{`
+                .team-lead-auth {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #f4f4f4;
+                }
+
+                form {
+                    background-color: white;
+                    padding: 30px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                    width: 400px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+
+                h2 {
+                    text-align: center;
+                    font-size: 24px;
+                    color: #333;
+                }
+
+                input {
+                    padding: 10px;
+                    margin: 5px 0;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    background-color:rgb(102, 104, 106);
+                }
+
+                button {
+                    padding: 12px;
+                    background-color: #007bff;
+                    border: none;
+                    border-radius: 4px;
+                    color: white;
+                    font-size: 16px;
+                    cursor: pointer;
+                }
+
+                button:hover {
+                    background-color: #0056b3;
+                }
+
+                p {
+                    text-align: center;
+                    color: #007bff;
+                    cursor: pointer;
+                }
+
+                p:hover {
+                    text-decoration: underline;
+                }
+            `}</style>
         </div>
     );
 };

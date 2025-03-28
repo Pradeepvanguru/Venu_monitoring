@@ -8,6 +8,8 @@ const Data = require('../models/Data');
 const Task = require('../models/Task');
 const upload = require('../middleware/uploads');
 const mime = require('mime-types');
+const User = require('../models/User');
+const authMiddleware = require('../middleware/authMiddleware'); // Ensure you have an auth middleware
 
 
 
@@ -41,12 +43,27 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const generateAccessKey = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-};
 
-// Email function with moduleId included
-const sendTaskEmail = async ({ taskName, assignEmail, startDate, endDate, taskFile, accessKey, moduleId, req }, retries = 3) => {
+//fetch the task based on the team-lead T_id
+router.get("/tasks", authMiddleware, async (req, res) => {
+  try {
+      // Only allow team leads
+      if (req.user.role !== "team-lead") {
+          return res.status(403).json({ error: "Access denied. Only team leads can fetch tasks." });
+      }
+    //  console.log("id:",req.user.id)
+     const task = await User.findById(req.user.id)
+     const data=task.team_id
+    //  console.log("T_id:",data)
+      const tasks = await Task.find({team_id:data});
+      res.json(tasks);
+  } catch (err) {
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+const sendTaskEmail = async ({ taskName, assignEmail, startDate, endDate, taskFile, team_id, moduleId, req }, retries = 3) => {
     const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${path.basename(taskFile)}`;
 
     const mailOptions = {
@@ -62,7 +79,7 @@ const sendTaskEmail = async ({ taskName, assignEmail, startDate, endDate, taskFi
                 <p><strong>Module ID:</strong> ${moduleId}</p>  <!-- New Module ID field in email -->
                 <p><strong>Start Date:</strong> ${startDate}</p>
                 <p><strong>End Date:</strong> ${endDate}</p>
-                <p><strong>Access Key:</strong> ${accessKey}</p>
+                <p><strong>ID:</strong> ${team_id}</p>
                 <p>You can download the task file <a href="${fileUrl}">here</a>.</p>
                 <p>Best regards,<br>Team Management System</p>
             </div>
@@ -78,55 +95,73 @@ const sendTaskEmail = async ({ taskName, assignEmail, startDate, endDate, taskFi
         if (retries > 0 && error.code === 'ECONNRESET') {
             console.log(`Retrying... Attempts left: ${retries - 1}`);
             await new Promise(res => setTimeout(res, 2000));
-            return sendTaskEmail({ taskName, assignEmail, startDate, endDate, taskFile, accessKey, moduleId, req }, retries - 1);
+            return sendTaskEmail({ taskName, assignEmail, startDate, endDate, taskFile, team_id, moduleId, req }, retries - 1);
         }
     }
 };
 
-// POST request to create a task
-router.post('/tasks', upload.single('taskFile'), async (req, res) => {
-    const { taskName, assignEmail, startDate, endDate, moduleId } = req.body;
-    const taskFile = req.file ? req.file.path : null;
-    const accessKey = generateAccessKey();
+router.post('/tasks', authMiddleware, upload.single('taskFile'), async (req, res) => {
+  const {assignEmail, taskName, startDate, endDate, moduleId } = req.body;
+  const taskFile = req.file ? req.file.path : null;
 
-    try {
-        // Create a new Task document with moduleId included
-        const newTask = new Task({  taskName, assignEmail, startDate, endDate, taskFile, accessKey, moduleId });
-        await newTask.save();
+  try {
+     
 
-        // Send email with the task details including moduleId
-        sendTaskEmail({ taskName, assignEmail, startDate, endDate, taskFile, accessKey, moduleId, req });
+      // Find the logged-in user in the database
+      const user = await User.findById(req.user.id);  // Fix: Use findById
 
-        res.status(201).json({ message: 'Task created and email is being sent', task: newTask });
-    } catch (err) {
-        res.status(500).json({ error: 'Error creating task', details: err.message });
-    }
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      // console.log("User found:", user);
+
+      // Get T_id from the user
+      const team_id = user.team_id;
+      // console.log("User T_id:", team_id);
+
+      // Check for missing taskFile
+      if (!taskFile) {
+          return res.status(400).json({ error: 'Task file is required' });
+      }
+
+      // Create a new task with T_id
+      const newTask = new Task({ taskName, startDate, endDate, taskFile, team_id, moduleId,assignEmail });
+      await newTask.save();
+
+      res.status(201).json({ message: 'Task created successfully', task: newTask });
+  } catch (err) {
+      console.error("Error creating task:", err);
+      res.status(500).json({ error: 'Error creating task', details: err.message });
+  }
 });
 
-// Fetch all tasks
-router.get('/tasks', async (req, res) => {
-    try {
-        const tasks = await Task.find();
-        res.status(200).json(tasks);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+// Get logged-in user's details
+router.get('/logged-user',authMiddleware, async (req, res) => {
+  try {
+      const userId = req.user.id; // Extract user ID from the token
+      const user = await User.findById(userId).select('name email'); // Fetch name & email
+
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json({ name: user.name, email: user.email });
+  } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
 });
+
 
 // Fetch task based on email (assignEmail in the database)
-router.get('/tasks', async (req, res) => {
-    const { email } = req.query; // Get email from query parameters
-
-    // Validate that email is provided
-    if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
-        
-    }
-    // console.log(email,"email ")
+router.get('/tasks',authMiddleware, async (req, res) => {
+   
+    // console.log( req.user.email," :email ")
 
     try {
         // Find the task by assigned email (assignEmail)
-        const task = await Task.find({ assignEmail: email });
+        const task = await Task.find({ assignEmail: req.user.email });
 
         // If no task is found, return a 404 error
         if (!task) {
@@ -141,19 +176,12 @@ router.get('/tasks', async (req, res) => {
     }
 });
 
-router.get('/task', async (req, res) => {
-  const { email } = req.query; // Get email from query parameters
-
-  // Validate that email is provided
-  if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
-      
-  }
-  // console.log(email,"email ")
-
+router.get('/task',authMiddleware, async (req, res) => {
+  
+  // console.log( req.user.email," :email ",email)
   try {
       // Find the task by assigned email (assignEmail)
-      const task = await Task.find({ assignEmail: email });
+      const task = await Task.find({ assignEmail: req.user.email});
 
       // If no task is found, return a 404 error
       if (!task) {
@@ -294,28 +322,40 @@ router.get('/task-modules/:moduleId', async (req, res) => {
 
 
 router.post('/submit-task', upload.single('file'), async (req, res) => {
-  // console.log('Received data:', req.body);
-  // console.log('Received file:', req.file);
-
   try {
     // Extract data from the request body
     const { moduleId, assignEmail, dayIndex } = req.body;
-    const fileUrl = req.file.path;  // Get the file path from multer
+
+    // Ensure a file is uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: 'File is required' });
+    }
+    
+    const fileUrl = req.file.path; // Get the file path from multer
 
     // Validate input data
-    if (!moduleId || !assignEmail || !dayIndex || !fileUrl) {
+    if (!moduleId || !assignEmail || !dayIndex) {
       return res.status(400).json({ message: 'All fields are required' });
     }
+
+    // Fetch task details
+    const taskData = await Task.findOne({ assignEmail });
+
+    if (!taskData) {
+      return res.status(404).json({ message: 'Task not found for the given email' });
+    }
+
+    const team_id = taskData.team_id;  // Extract T_id from the found task
 
     // Step 1: Save the data into the Data collection
     const newData = new Data({
       moduleId,
       assignEmail,
       dayIndex,
-      fileUrl
+      fileUrl,
+      team_id
     });
 
-    // Save new data document
     await newData.save();
 
     // Step 2: Update the Tasks collection
@@ -324,28 +364,27 @@ router.post('/submit-task', upload.single('file'), async (req, res) => {
       assignedEmail: assignEmail,
       day: dayIndex.toString(), // Convert to string if necessary
     };
-    
-    // await Task.updateOne(
-    //   { 'submission.assignEmail': assignEmail},
-    //   { $push: { submissions: submission } }
-    // );
-  const task = await Task.findOne({ moduleId, assignEmail });
-  const submissionsCount = task.submissions.length;
-  // console.log('Matched Task:', task);
-  const result = await Task.updateOne({ moduleId, assignEmail }, { $push: { submissions: submission } });
-if (result.matchedCount === 0) {
-  console.error('No matching document found');
-}
-// await Task.updateOne(
-//   { moduleId, assignEmail }, // Query matches document with these fields
-//   { $push: { submissions: submission } } // Pushes the new submission to the array
-// );
 
+    const task = await Task.findOne({ moduleId, assignEmail });
+
+    if (!task) {
+      return res.status(404).json({ message: 'No matching task found' });
+    }
+
+    const result = await Task.updateOne(
+      { moduleId, assignEmail },
+      { $push: { submissions: submission } }
+    );
+
+    if (result.matchedCount === 0) {
+      console.error('No matching document found');
+    }
 
     // Step 3: Respond with success message
     return res.status(200).json({ message: 'Task submitted successfully' });
+
   } catch (error) {
-    console.error(error);
+    console.error('Error in /submit-task:', error);
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

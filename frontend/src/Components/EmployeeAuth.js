@@ -1,89 +1,80 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Auth.css';
-
+import axios from 'axios';
+import { message, notification } from 'antd';
+import "./Auth.css"
 
 const EmployeeAuth = () => {
-    const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [isSignup, setIsSignup] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
-    const handleToggle = () => {
-        setIsLogin(!isLogin);
-        setErrorMessage('');
+    const switchMode = () => {
+        setIsSignup((prevIsSignup) => !prevIsSignup);
     };
 
-    const handleLogin = async (e) => {
+    const handleAuth = async (e) => {
         e.preventDefault();
-        try {
-            const response = await fetch(`${process.env.REACT_APP_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
+        const authData = { email, password, role: 'employee' };
 
-            const data = await response.json();
-            if (data.message === 'Login successful') {
-                localStorage.setItem('userRole', data.role);
-                localStorage.setItem('loggedInEmail', email); // Update the key to be consistent
-                if (data.role === 'employee') {
-                    navigate('/employee-dashboard');
-                    window.location.reload();
-                } else if (data.role === 'teamLead') {
-                    navigate('/team-lead-interface');
-                    window.location.reload();
-                }
-            } else {
-                setErrorMessage(data.message);
+        if (isSignup) {
+            if (password !== confirmPassword) {
+                notification.error({
+                    message: 'Error',
+                    description: 'Passwords do not match!',
+                });
+                return;
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            setErrorMessage('Server error. Please try again later.');
-        }
-    };
+            authData.name = name;
+            try {
+                const response = await axios.post(`${process.env.REACT_APP_URL}/auth/signup`, authData);
+                notification.success({
+                    message: 'Success',
+                    description: response.data.message,
+                });
+                setIsSignup(false);
+            } catch (error) {
+                notification.error({
+                    message: 'Error',   
+                    description: error.response.data.message || 'Signup failed. Please try again.'
+                })
 
-    const handleSignup = async (e) => {
-        e.preventDefault();
-
-        if (password !== confirmPassword) {
-            setErrorMessage("Passwords do not match!");
-            return;
-        }
-
-        try {
-            const response = await fetch(`${process.env.REACT_APP_URL}/auth/signup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, role: 'employee' }),
-            });
-
-            const data = await response.json();
-            if (data.message === 'User registered successfully') {
+                console.error(error.response?.data?.message || 'Signup failed. Please try again.');
+            }
+        } else {
+            try {
+                const response = await axios.post(`${process.env.REACT_APP_URL}/auth/login`, authData);
+                localStorage.setItem('userToken', response.data.token);
                 localStorage.setItem('userRole', 'employee');
-                localStorage.setItem('loggedInEmail', email); // Update the key to be consistent
-                navigate('/employee-interface');
-                window.location.reload();
-            } else {
-                setErrorMessage(data.message);
+                localStorage.setItem('loggedInEmail', authData.email);
+                localStorage.setItem('team_id', response.data.team_id);
+                localStorage.setItem('userName', response.data.name);
+                navigate('/employee-dashboard');
+                notification.success({
+                    message:"Login SuccessFully",
+                    discription:'Welcome to Employee Pannel'
+                })
+            } catch (error) {
+                notification.error({
+                    message: 'Error',
+                    description: error.response?.data?.message || 'Login failed. Please try again.',
+                })
+                console.error(error.response?.data?.message || 'Login failed. Please try again.');
             }
-        } catch (error) {
-            console.error('Signup error:', error);
-            setErrorMessage('Server error. Please try again later.');
         }
     };
 
     return (
-        <div className="auth-container">
-            <h2>{isLogin ? 'Employee Login' : 'Employee Signup'}</h2>
-            <form onSubmit={isLogin ? handleLogin : handleSignup}>
-                {!isLogin && (
+        <div className="employee-auth">
+            <form onSubmit={handleAuth}>
+                <h2>{isSignup ? 'Employee Signup' : 'Employee Login'}</h2>
+                {isSignup && (
                     <input
                         type="text"
-                        placeholder="Full Name"
+                        placeholder="Name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
@@ -103,24 +94,79 @@ const EmployeeAuth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                 />
-                {!isLogin && (
+                {isSignup && (
                     <input
-                        type="text"
+                        type="password"
                         placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                     />
                 )}
-                {errorMessage && <p className="error-message">{errorMessage}</p>}
-                <button type="submit">{isLogin ? 'Login' : 'Signup'}</button>
-                <p>
-                    {isLogin ? "Don't have an account? " : 'Already have an account? '}
-                    <span onClick={handleToggle}>
-                        {isLogin ? 'Sign Up' : 'Log In'}
-                    </span>
+                <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
+                <p onClick={switchMode}>
+                    {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
                 </p>
             </form>
+            <style >{`
+                .employee-auth {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #f4f4f4;
+                }
+
+                form {
+                    background-color: white;
+                    padding: 30px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                    width: 400px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+
+                h2 {
+                    text-align: center;
+                    font-size: 24px;
+                    color: #333;
+                }
+
+                input {
+                    padding: 10px;
+                    margin: 5px 0;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    background-color:rgb(102, 104, 106);
+                }
+
+                button {
+                    padding: 12px;
+                    background-color: #007bff;
+                    border: none;
+                    border-radius: 4px;
+                    color: white;
+                    font-size: 16px;
+                    cursor: pointer;
+                }
+
+                button:hover {
+                    background-color: #0056b3;
+                }
+
+                p {
+                    text-align: center;
+                    color: #007bff;
+                    cursor: pointer;
+                }
+
+                p:hover {
+                    text-decoration: underline;
+                }
+            `}</style>
         </div>
     );
 };

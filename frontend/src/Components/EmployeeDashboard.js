@@ -12,7 +12,7 @@ const EmployeeDashboard = () => {
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState('');
     const navigate = useNavigate(); // Initialize navigation
-    const loggedInEmail = localStorage.getItem('loggedInEmail'); // Get the logged-in email
+    const token=localStorage.getItem('userToken')
 
     useEffect(() => {
         fetchTasks();
@@ -21,7 +21,8 @@ const EmployeeDashboard = () => {
     const fetchTasks = async () => {
         try {
             const res = await axios.get(`${process.env.REACT_APP_URL}/api/task`, {
-                params: { email: loggedInEmail },
+                headers: { "Content-Type": "application/json",'Authorization': `Bearer ${token}` }
+               
             });
             const fetchedTasks = res.data;
 
@@ -101,7 +102,7 @@ const EmployeeDashboard = () => {
                                             <div className="task-details">
                                                 <h3 className="task-name">{task.taskName}</h3>
                                                 <p className="task-module-id"><strong>Module ID:</strong> {task.moduleId}</p>
-                                                <p className="task-date"><strong>Assigned to:</strong> {task.assignEmail}</p>
+                                                <p className="task-date"><strong>Your Email:</strong> {task.assignEmail}</p>
                                                 <p className="task-date"><strong>Start Date:</strong> {formattedStartDate}</p>
                                                 <p className="task-date"><strong>Deadline:</strong> {formattedEndDate}</p>
                                             </div>

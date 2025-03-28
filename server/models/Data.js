@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const dataSchema = new mongoose.Schema({
+  team_id:{type:String,required:true},
   moduleId: { type: String, required: true },
   assignEmail: { type: String, required: true },
   dayIndex: { type: Number, required: true },

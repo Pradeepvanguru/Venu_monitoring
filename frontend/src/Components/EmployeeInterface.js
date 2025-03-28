@@ -4,6 +4,7 @@ import Progressbar from './progressbar';
 import EmployeeSidebar from './EmployeeSidebar';
 import './EmployeeInterface.css';
 import { format } from 'date-fns';
+import {message, notification} from 'antd'
 
 const TaskModules = () => {
   const { task, loading, error } = useFetchTask(); // Fetch task by the logged-in email
@@ -13,13 +14,13 @@ const TaskModules = () => {
     
 
   if (!file) {
-    alert('Please select a file to upload.');
+    notification.info({message:'Please select a file to upload.'});
     return;
     }
    const assignEmail =  task?.assignEmail; // Ensure this variable has a valid value
  // Replace `user` with the appropriate context or state holding the email
   if (!assignEmail) {
-    alert('User email is missing.');
+    notification.info({message:'User email is missing.'});
     return;
   }
 
@@ -29,29 +30,28 @@ const TaskModules = () => {
   formData.append('assignEmail', assignEmail);// Replace with appropriate user email value
     formData.append('dayIndex', dayIndex);
     
-     
-
   try {
     const response = await fetch(`${process.env.REACT_APP_URL}/api/submit-task`, {
       method: 'POST',
       body: formData,
+      
     });
   
     if (!response.ok) {
       const result = await response.json();
       console.error('Submission failed:', result);
-      alert(`Submission failed: ${result.message}`);
+      notification.error({message:`Submission failed: ${result.message}`});
       return;
     }
 
     // console.log('File uploaded successfully:', await response.json());
    
-    alert('File uploaded successfully!');
+    notification.success({message:'File uploaded successfully!'});
      // Reload the page after successful submission
      window.location.reload();
   } catch (error) {
     console.error('Error during submission:', error);
-    alert(`Error during submission: ${error.message}`);
+    notification.error(`Error during submission: ${error.message}`);
   }
 };
 
@@ -66,7 +66,7 @@ const TaskModules = () => {
 
   const totalDays = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
   const count=task.submissions.length
-  console.log(count,"count")
+  // console.log(count,"count")
 
   return (
     <div className="page-container">

@@ -198,13 +198,14 @@ html, body {
   
   .preview-modal button {
     position: absolute;
-    top: 10px;
+    top: 20px;
     right: 30px;
     padding: 9px 10px;
-    background-color: #ff5c5c;
+    background-color: #fb0505;
     border: none;
     color: white;
     cursor: pointer;
+    border-radius: 0.8rem;
   }
   
 

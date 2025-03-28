@@ -4,6 +4,8 @@ import './CreateTask.css';
 import axios from 'axios';
 import EmployeeSidebar from './EmployeeSidebar';
 import Sidebar from './Sidebar';
+import {notification} from 'antd';
+
 
 const CreateTask = () => {
     const [teamLead, setTeamLead] = useState('');
@@ -19,6 +21,8 @@ const CreateTask = () => {
         setTaskFile(e.target.files[0]);
     };
 
+    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
@@ -30,21 +34,27 @@ const CreateTask = () => {
         if (taskFile) {
             formData.append('taskFile', taskFile);
         }
-
+    
         try {
-            const response = await axios.post(`${process.env.REACT_APP_URL}/api/tasks`, formData, {
+            const token = localStorage.getItem('userToken'); // Ensure token exists
+            console.log('Sending token:', token); // Debugging log
+    
+            const response = await axios.post('http://localhost:5000/api/tasks', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
-
-            if (response.status === 201) {
-                navigate('/team-lead-interface');
-            }
+            notification.success({message:"Task created successfully"});
+            // console.log('Response:', response);
+            navigate("/Team-lead-interface")
+           
         } catch (error) {
-            console.error('Error creating task:', error);
+            console.error('Error creating task:', error.response ? error.response.data : error.message);
         }
     };
+    
+    
 
     return (
         <div className="create-task-container">
@@ -65,7 +75,7 @@ const CreateTask = () => {
                
                 <input
                     type="email"
-                    placeholder="Assign Email"
+                    placeholder="Assignd Email"
                     value={assignEmail}
                     onChange={(e) => setAssignEmail(e.target.value)}
                     required
@@ -82,7 +92,7 @@ const CreateTask = () => {
                 <label>Project Documents</label>
                 <input
                     type="file"
-                    accept=".pdf,.doc,.docx,.txt"
+                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
                     onChange={handleFileChange}
                     required
                 />

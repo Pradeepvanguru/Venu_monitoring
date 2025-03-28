@@ -1,5 +1,4 @@
 // server.js
-
 const express = require('express');
 const connectDB = require('./db');
 const dotenv = require('dotenv');
@@ -10,6 +9,9 @@ const path = require('path');
 const fs = require('fs');
 const mime = require('mime-types');
 const Data = require('./models/Data'); // Import your Data model
+const messageRoutes = require('./routes/messageRoutes');
+const http = require('http');
+const { Server } = require('socket.io');
 
 dotenv.config();  // Load environment variables
 
@@ -25,10 +27,28 @@ app.use(cors({
   methods: ['GET', 'POST', 'DELETE','UPDATE'],  // Allow GET, POST, DELETE methods
   credentials: true  // Allow credentials (cookies, authorization headers, etc.)
 }));
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
 
 // Route setup
 app.use('/auth', authRoutes);  // Authentication routes
 app.use('/api', taskRoutes);   // Task routes
+app.use('/api/messages', messageRoutes);
+
+
+
+// WebSocket connection
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('sendMessage', (data) => {
+      io.emit('receiveMessage', data); // Broadcast message
+  });
+
+  socket.on('disconnect', () => {
+      console.log('User disconnected:', socket.id);
+  });
+});
 
 
 

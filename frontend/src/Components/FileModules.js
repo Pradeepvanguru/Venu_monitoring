@@ -135,7 +135,7 @@ const FileModules = () => {
                   {showPreview && (
                     <div className="preview-overlay">
                       <div className="preview-modal">
-                        <button onClick={closePreview}>Close</button>
+                        <button onClick={closePreview}> X Close</button>
                         <iframe
                           src={fileUrl}
                           width="600"

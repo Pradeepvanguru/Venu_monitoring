@@ -33,6 +33,18 @@
   border: none;
   border-radius: 1rem;
   padding: 20px 10px;
+  
+}
+.sidebar-header p {
+  background: linear-gradient(to right, #5fff62, #f27d07,#27f303,#edf901); /* Adjust colors as needed */
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  box-shadow: 2px 0 10px  rgb(240, 238, 238); /* Slight shadow */
+  font-weight: bold;
+  border: none;
+  border-radius: 1rem;
+  padding: 20px 10px;
+  font-size: 18px;
 }
 
 
