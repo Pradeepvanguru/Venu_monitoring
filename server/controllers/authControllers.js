@@ -11,8 +11,7 @@ const generateAccessKey = () => {
 
 
 const signup = async (req, res) => {
-    const { name, email, password, role, team_id } = req.body;
-    let teamId = team_id; // Assign input team_id if employee
+    const { name, email, password, role, teamId } = req.body;
 
     try {
         // Check if the user already exists
@@ -24,7 +23,7 @@ const signup = async (req, res) => {
         // Assign team_id based on role
         if (role === "team-lead") {
             teamId = generateAccessKey(); // Generate new team_id for team-lead
-        } else if (role === "employee" && !team_id) {
+        } else if (role === "employee" && !teamId) {
             return res.status(400).json({ message: "Team ID is required for employees" });
         }
 
@@ -53,10 +52,10 @@ const signup = async (req, res) => {
 
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password,role } = req.body;
 
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email,role:role});
         if (!user) {
             return res.status(400).json({ message: 'Invalid email or password' });
         }

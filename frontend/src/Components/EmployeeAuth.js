@@ -2,14 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { message, notification } from 'antd';
-import "./Auth.css"
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import "./Auth.css";
 
 const EmployeeAuth = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [teamId, setTeamId] = useState('');
     const [isSignup, setIsSignup] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
 
     const switchMode = () => {
@@ -18,7 +22,7 @@ const EmployeeAuth = () => {
 
     const handleAuth = async (e) => {
         e.preventDefault();
-        const authData = { email, password, role: 'employee' };
+        const authData = { email, password, role: 'employee', teamId, name };
 
         if (isSignup) {
             if (password !== confirmPassword) {
@@ -29,6 +33,8 @@ const EmployeeAuth = () => {
                 return;
             }
             authData.name = name;
+            authData.teamId = teamId;
+
             try {
                 const response = await axios.post(`${process.env.REACT_APP_URL}/auth/signup`, authData);
                 notification.success({
@@ -38,10 +44,9 @@ const EmployeeAuth = () => {
                 setIsSignup(false);
             } catch (error) {
                 notification.error({
-                    message: 'Error',   
-                    description: error.response.data.message || 'Signup failed. Please try again.'
-                })
-
+                    message: 'Error',
+                    description: error.response?.data?.message || 'Signup failed. Please try again.',
+                });
                 console.error(error.response?.data?.message || 'Signup failed. Please try again.');
             }
         } else {
@@ -54,14 +59,14 @@ const EmployeeAuth = () => {
                 localStorage.setItem('userName', response.data.name);
                 navigate('/employee-dashboard');
                 notification.success({
-                    message:"Login SuccessFully",
-                    discription:'Welcome to Employee Pannel'
-                })
+                    message: "Login Successfully",
+                    description: 'Welcome to Employee Panel'
+                });
             } catch (error) {
                 notification.error({
                     message: 'Error',
                     description: error.response?.data?.message || 'Login failed. Please try again.',
-                })
+                });
                 console.error(error.response?.data?.message || 'Login failed. Please try again.');
             }
         }
@@ -72,13 +77,22 @@ const EmployeeAuth = () => {
             <form onSubmit={handleAuth}>
                 <h2>{isSignup ? 'Employee Signup' : 'Employee Login'}</h2>
                 {isSignup && (
-                    <input
-                        type="text"
-                        placeholder="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
+                    <>
+                        <input
+                            type="text"
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="text"
+                            placeholder="Team ID"
+                            value={teamId}
+                            onChange={(e) => setTeamId(e.target.value)}
+                            required
+                        />
+                    </>
                 )}
                 <input
                     type="email"
@@ -87,28 +101,38 @@ const EmployeeAuth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                 />
-                <input
-                    type="password"
-                    placeholder="Password must be 6 or more characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                {isSignup && (
+                <div className="password-container text-white">
                     <input
-                        type="password"
-                        placeholder="Confirm Password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Password must be 6 or more characters"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                     />
+                    <span className="eye-icon text-white" onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                </div>
+                {isSignup && (
+                    <div className="password-container ">
+                        <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                        />
+                        <span className="eye-icon text-white" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                        </span>
+                    </div>
                 )}
                 <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
                 <p onClick={switchMode}>
                     {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
                 </p>
             </form>
-            <style >{`
+            <style>{`
                 .employee-auth {
                     display: flex;
                     justify-content: center;
@@ -140,7 +164,26 @@ const EmployeeAuth = () => {
                     border: 1px solid #ccc;
                     border-radius: 4px;
                     font-size: 16px;
-                    background-color:rgb(102, 104, 106);
+                    background-color: rgb(102, 104, 106);
+                    width: 100%;
+                }
+
+                .password-container {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .password-container input {
+                    flex: 1;
+                    padding-right: 40px;
+                }
+
+                .eye-icon {
+                    position: absolute;
+                    right: 10px;
+                    cursor: pointer;
+                    color: #666;
                 }
 
                 button {
