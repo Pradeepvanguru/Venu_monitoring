@@ -9,8 +9,8 @@ router.get('/chat-list',authMiddleware, async (req, res) => {
     const {team_id,email}=req.query;
     try {
         const users = await User.find({ team_id , email: { $ne: email },_id:{$ne:req.user.id}});
-        // console.log("id:",team_id)
-        // console.log("Chat_Names:",users)
+        // console.log("id:",team_id,req.user.id)
+        // console.log("Chat_Names:",email)
 
         if (!users.length) {
             return res.status(403).json({ error: 'No users found or unauthorized access.' });

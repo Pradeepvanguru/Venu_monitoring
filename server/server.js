@@ -24,7 +24,7 @@ connectDB();
 app.use(express.json());  // Parse JSON bodies
 app.use(cors({
   origin: 'http://localhost:3000',  // Allow requests from your frontend
-  methods: ['GET', 'POST', 'DELETE','UPDATE'],  // Allow GET, POST, DELETE methods
+  methods: ['GET', 'POST', 'DELETE','UPDATE','PUT'],  // Allow GET, POST, DELETE methods
   credentials: true  // Allow credentials (cookies, authorization headers, etc.)
 }));
 const server = http.createServer(app);

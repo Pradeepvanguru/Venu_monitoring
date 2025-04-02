@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { message, notification } from 'antd';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import "./Auth.css";
+import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 const EmployeeAuth = () => {
     const [email, setEmail] = useState('');
@@ -14,15 +16,20 @@ const EmployeeAuth = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [profile,setProfilePic]=useState(null)
     const navigate = useNavigate();
 
     const switchMode = () => {
         setIsSignup((prevIsSignup) => !prevIsSignup);
     };
+    const handleFileChange = (e) => {
+        setProfilePic(e.target.files[0]);
+    };
+
 
     const handleAuth = async (e) => {
         e.preventDefault();
-        const authData = { email, password, role: 'employee', teamId, name };
+        const authData = { email, password, role: 'employee', teamId, name,profile };
 
         if (isSignup) {
             if (password !== confirmPassword) {
@@ -36,7 +43,10 @@ const EmployeeAuth = () => {
             authData.teamId = teamId;
 
             try {
-                const response = await axios.post(`${process.env.REACT_APP_URL}/auth/signup`, authData);
+                const response = await axios.post(`${process.env.REACT_APP_URL}/auth/signup`, authData,{
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                }
+                );
                 notification.success({
                     message: 'Success',
                     description: response.data.message,
@@ -44,7 +54,7 @@ const EmployeeAuth = () => {
                 setIsSignup(false);
             } catch (error) {
                 notification.error({
-                    message: 'Error',
+                    message: 'Signup Failed',
                     description: error.response?.data?.message || 'Signup failed. Please try again.',
                 });
                 console.error(error.response?.data?.message || 'Signup failed. Please try again.');
@@ -72,10 +82,15 @@ const EmployeeAuth = () => {
         }
     };
 
+    
+
     return (
         <div className="employee-auth">
             <form onSubmit={handleAuth}>
-                <h2>{isSignup ? 'Employee Signup' : 'Employee Login'}</h2>
+              <button onClick={() => window.history.back()} className="back-button">
+                            <FontAwesomeIcon icon={faArrowLeft} /> Back
+                        </button>
+                <center><h4>{isSignup ? 'Employee Signup' : 'Employee Login'}</h4></center>
                 {isSignup && (
                     <>
                         <input
@@ -92,6 +107,7 @@ const EmployeeAuth = () => {
                             onChange={(e) => setTeamId(e.target.value)}
                             required
                         />
+                        <input type="file" accept="image/*" onChange={handleFileChange} />
                     </>
                 )}
                 <input
@@ -109,10 +125,13 @@ const EmployeeAuth = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
+                    
                     <span className="eye-icon text-white" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
+                    
                 </div>
+                
                 {isSignup && (
                     <div className="password-container ">
                         <input
@@ -127,10 +146,12 @@ const EmployeeAuth = () => {
                         </span>
                     </div>
                 )}
-                <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
+                <button className='actions' type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
                 <p onClick={switchMode}>
                     {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
                 </p>
+                <center><Link to='/forgot'>Forgot Password?</Link></center>
+                
             </form>
             <style>{`
                 .employee-auth {
@@ -139,17 +160,19 @@ const EmployeeAuth = () => {
                     align-items: center;
                     height: 100vh;
                     background-color: #f4f4f4;
+                    padding:10px;
+                    width:100%;
                 }
 
                 form {
                     background-color: white;
-                    padding: 30px;
+                    padding: 20px;
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
                     border-radius: 8px;
                     width: 400px;
                     display: flex;
                     flex-direction: column;
-                    gap: 15px;
+                    gap: 8px;
                 }
 
                 h2 {
@@ -157,6 +180,22 @@ const EmployeeAuth = () => {
                     font-size: 24px;
                     color: #333;
                 }
+
+                .back-button {
+                background: white;
+                border: none;
+                color: #007bff;
+                font-size: 16px;
+                cursor: pointer;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                }
+
+                .back-button svg {
+                margin-right: 5px;
+                }
+
 
                 input {
                     padding: 10px;
@@ -186,9 +225,9 @@ const EmployeeAuth = () => {
                     color: #666;
                 }
 
-                button {
+                .actions {
                     padding: 12px;
-                    background-color: #007bff;
+                    background-color: rgba(5, 200, 171, 0.8);
                     border: none;
                     border-radius: 4px;
                     color: white;
@@ -196,8 +235,8 @@ const EmployeeAuth = () => {
                     cursor: pointer;
                 }
 
-                button:hover {
-                    background-color: #0056b3;
+                .actions:hover {
+                    background-color:rgba(5, 200, 171, 0.44);
                 }
 
                 p {

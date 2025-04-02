@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import './FileModules.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 const FileModules = () => {
   const [moduleId, setModuleId] = useState('');
@@ -83,6 +85,9 @@ const FileModules = () => {
     <div className="team-lead-interface">
       <Sidebar />
       <main className="main-content">
+       <button onClick={() => window.history.back()} className="back-button text-primary border-0 p-2 my-2">
+            <FontAwesomeIcon icon={faArrowLeft} /> Back
+        </button>
         <h1>File Modules</h1>
         <p>Manage and review files and modules here.</p>
 
@@ -152,6 +157,24 @@ const FileModules = () => {
           </div>
         )}
       </main>
+      {/* <style>
+        {
+          `
+           .back-button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #007bff;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+          `
+        }
+      </style> */}
     </div>
   );
 };

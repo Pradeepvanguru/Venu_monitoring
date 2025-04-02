@@ -178,7 +178,7 @@ router.get('/tasks',authMiddleware, async (req, res) => {
 
 router.get('/task',authMiddleware, async (req, res) => {
   
-  // console.log( req.user.email," :email ",email)
+  // console.log( req.user.email," :email ")
   try {
       // Find the task by assigned email (assignEmail)
       const task = await Task.find({ assignEmail: req.user.email});

@@ -32,11 +32,7 @@ const Sidebar = () => {
     }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem('userToken');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('team_id');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('login')
+        localStorage.clear();
         navigate('/');
     };
     const handlerefresh = () => {
@@ -52,6 +48,7 @@ const Sidebar = () => {
             </div>
             <nav className="sidebar-nav">
                 <Link to="/team-lead-interface" onClick={handlerefresh}>Dashboard &gt;</Link>
+                <Link to="/profile" className="dropdown-item">Profile</Link>
                 <Link to="/create-task">Create Task &gt;</Link>
                 <Link to="/file-modules">File Modules &gt;</Link>
                 <Link to="/queries">Query &gt;</Link>

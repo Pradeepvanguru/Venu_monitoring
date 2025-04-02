@@ -48,6 +48,7 @@ const authMiddleware = async (req, res, next) => {
     try {
         const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
         req.user = decoded.user;
+        // req.user = await User.findById(decoded.id).select("-password");
 
          // Find user by ID instead of email
         const user = await User.findById(req.user.id);
@@ -56,7 +57,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         // Store only essential user data in req.user
-        req.user = { id: user._id, role: user.role,email: user.email };
+        req.user = { id: user._id, role: user.role,email: user.email,name:user.name };
 
         // console.log('User authenticated:', req.user);
 
@@ -73,4 +74,35 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
+
+// const authMiddleware = async (req, res, next) => {
+//     try {
+//         const token = req.header("Authorization");
+//         if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
+
+//         // Remove 'Bearer ' prefix if present
+//         const cleanToken = token.startsWith("Bearer ") ? token.slice(7) : token;
+
+//         // Verify token
+//         const decoded = jwt.verify(cleanToken, process.env.JWT_SECRET);
+
+//         // Find user by ID
+//         const user = await User.findById(decoded.id).select("-password");
+//         if (!user) {
+//             return res.status(401).json({ error: "User not found." });
+//         }
+
+//         // Store only essential user data in req.user
+//         req.user = { id: user._id, role: user.role, email: user.email };
+
+//         // Role-based access control
+//         if (!["team-lead", "employee"].includes(req.user.role)) {
+//             return res.status(403).json({ error: "Access denied." });
+//         }
+
+//         next();
+//     } catch (err) {
+//         res.status(400).json({ error: "Invalid token." });
+//     }
+// };
 module.exports = authMiddleware;

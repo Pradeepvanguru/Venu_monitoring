@@ -9,12 +9,7 @@ const EmployeeSidebar = () => {
     const userName=localStorage.getItem("userName")
 
     const handleLogout = () => {
-        localStorage.removeItem('userName');
-        localStorage.removeItem('team_id');
-        localStorage.removeItem('loggedInEmail');
-        localStorage.removeItem('userRole')
-        localStorage.removeItem('userName')
-        localStorage.removeItem('userToken')
+        localStorage.clear();
         navigate('/');
     };
 
@@ -32,6 +27,7 @@ const EmployeeSidebar = () => {
             </div>
             <nav className="sidebar-nav">
                 <Link to="/employee-dashboard" onClick={handlerefresh}>Dashboard</Link>
+                <Link to="/profile" className="dropdown-item">Profile</Link>
                 <Link to="/queries">Queries</Link>
                 <button className="logout-btn" onClick={handleLogout}>Logout</button>
             </nav>

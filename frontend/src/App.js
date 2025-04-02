@@ -1,5 +1,5 @@
 // src/App.js
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Home from './Components/Home';
 import About from './Components/About';
@@ -15,6 +15,9 @@ import FileModules from './Components/FileModules';
 import ChatPage from './ChatsComponents/ChatPage';
 import TaskModules from './Components/EmployeeInterface';
 import { ToastContainer } from 'react-toastify';
+import Profile from './ChatsComponents/Profile';
+import ForgotPassword from './Components/forgot';
+
 
 const App = () => {
     // State for authentication
@@ -23,7 +26,7 @@ const App = () => {
     // Handle logout logic
     const handleLogout = () => {
         setIsAuthenticated(false);
-        localStorage.removeItem('userRole');
+        localStorage.clear();
     };
 
     // Conditional rendering of Navbar on certain pages
@@ -38,6 +41,17 @@ const App = () => {
             </>
         );
     };
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+          localStorage.clear();  // Clears all stored data
+        };
+    
+        window.addEventListener("beforeunload", handleBeforeUnload);
+    
+        return () => {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+      }, []);
 
     return (
         <NavbarWrapper>
@@ -55,6 +69,8 @@ const App = () => {
                 <Route path="/create-task" element={<CreateTask />} />
                 <Route path="/file-modules" element={<FileModules />} />
                 <Route path="/task-modules/:moduleId" element={<TaskModules />} />
+                <Route path='/profile' element={<Profile />}/>
+                <Route path='/forgot' element={<ForgotPassword />} />
                 {/* <Route path="/deadlines" element={<Deadlines />} /> */}
                 <Route path="/queries" element={<ChatPage />} />
                 {/* Specific route for employee task by moduleId */}

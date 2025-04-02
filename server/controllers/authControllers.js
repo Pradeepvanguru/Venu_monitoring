@@ -2,6 +2,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const multer = require('multer');
+const path = require('path');
 
 
 const generateAccessKey = () => {
@@ -9,11 +11,27 @@ const generateAccessKey = () => {
 };
 
 
+// Multer setup for image uploads
+const storage = multer.diskStorage({
+    destination: './uploads/',
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+
+
 
 const signup = async (req, res) => {
-    const { name, email, password, role, teamId } = req.body;
+    let { name, email, password, role, teamId } = req.body; // Use let for teamId
 
     try {
+        // Ensure a file is uploaded before proceeding
+        if (!req.file) {
+            return res.status(400).json({ message: "Profile photo is required" });
+        }
+        const fileUrl = req.file.path; // Get uploaded file path
+
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -22,7 +40,7 @@ const signup = async (req, res) => {
 
         // Assign team_id based on role
         if (role === "team-lead") {
-            teamId = generateAccessKey(); // Generate new team_id for team-lead
+            teamId = generateAccessKey(); // Assign new teamId
         } else if (role === "employee" && !teamId) {
             return res.status(400).json({ message: "Team ID is required for employees" });
         }
@@ -32,23 +50,34 @@ const signup = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         // Create a new user
-        const newUser = new User({ name, email, password: hashedPassword, role, team_id: teamId });
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role,
+            team_id: teamId,
+            profilePhoto: fileUrl // Correctly store uploaded file path
+        });
+
         await newUser.save();
 
         // Generate JWT token
-        const payload = { user: { id: newUser.id, role: newUser.role } };
+        const payload = { user: { id: newUser.id, role: newUser.role, name: newUser.name } };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" });
 
-        res.status(201).json({ 
-            message: "User registered successfully", 
-            token, 
-            team_id: teamId 
+        res.status(201).json({
+            message: "User registered successfully",
+            token,
+            team_id: teamId
         });
+
     } catch (error) {
         console.error("Signup Error:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
+
+
 
 
 const login = async (req, res) => {

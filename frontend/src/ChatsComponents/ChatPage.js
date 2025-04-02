@@ -129,7 +129,7 @@ const ChatPage = () => {
 
                 {users.map((user) => (
                     <div key={user._id} className="user-item" onClick={() => setSelectedUser(user)}>
-                        <FaUser className="user-icon" /> {user.name} ({user.role})
+                        <FaUser className="user-icon" /> {user.name} ({user.role}) 
                     </div>
                 ))}
             </div>

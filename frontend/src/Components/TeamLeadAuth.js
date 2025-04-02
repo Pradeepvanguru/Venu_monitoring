@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { notification } from 'antd';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
+
 
 const TeamLeadAuth = () => {
     const [email, setEmail] = useState('');
@@ -12,10 +15,18 @@ const TeamLeadAuth = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+     const [profile,setProfilePic]=useState(null)
+     const [file, setFile] = useState(null);
     const navigate = useNavigate();
 
     const switchMode = () => {
         setIsSignup((prevIsSignup) => !prevIsSignup);
+    };
+    const handleFileChange = (e) => {
+        setProfilePic(e.target.files[0]);
+        if (setProfilePic) {
+            setFile(setProfilePic);
+          }
     };
 
     const togglePasswordVisibility = () => {
@@ -28,7 +39,7 @@ const TeamLeadAuth = () => {
 
     const handleAuth = async (e) => {
         e.preventDefault();
-        const authData = { email, password, role: 'team-lead' };
+        const authData = { email, password, role: 'team-lead', name,profile };
     
         if (isSignup) {
             if (password !== confirmPassword) {
@@ -40,7 +51,9 @@ const TeamLeadAuth = () => {
             }
             authData.name = name;
             try {
-                const response = await axios.post(`${process.env.REACT_APP_URL}/auth/signup`, authData);
+                const response = await axios.post(`${process.env.REACT_APP_URL}/auth/signup`, authData,{
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 notification.success({
                     message: 'Success',
                     description: response.data.message,
@@ -57,7 +70,7 @@ const TeamLeadAuth = () => {
                 const response = await axios.post(`${process.env.REACT_APP_URL}/auth/login`, authData);
                 localStorage.setItem('userToken', response.data.token);
                 localStorage.setItem('userRole', 'team-lead');
-                localStorage.setItem('login', authData.email);
+                localStorage.setItem('loggedInEmail', authData.email);
                 localStorage.setItem('team_id', response.data.team_id);
                 localStorage.setItem('userName', response.data.name);
                 navigate('/team-lead-interface');
@@ -73,11 +86,35 @@ const TeamLeadAuth = () => {
             }
         }
     };
+    // const styles = {
+    //     container: {
+    //       display: "flex",
+    //       flexDirection: "column",
+    //       alignItems: "center",
+    //       marginTop: "20px",
+    //     },
+    //     input: {
+    //       padding: "8px",
+    //       border: "1px solid #ccc",
+    //       borderRadius: "5px",
+    //     },
+    //     fileInfo: {
+    //       marginTop: "10px",
+    //       fontSize: "16px",
+    //       color: "green",
+    //       fontWeight: "bold",
+    //     },
+    //   };
     
     return (
         <div className="team-lead-auth">
             <form onSubmit={handleAuth}>
-                <h2>{isSignup ? 'Team Lead Signup' : 'Team Lead Login'}</h2>
+             <button onClick={() => window.history.back()} className="back-button">
+                           <FontAwesomeIcon icon={faArrowLeft} /> Back
+                       </button>
+               <center>
+               <h4>{isSignup ? 'Team Lead Signup' : 'Team Lead Login'}</h4>
+               </center>
                 {isSignup && (
                     <input
                         type="text"
@@ -107,9 +144,12 @@ const TeamLeadAuth = () => {
                     ) : (
                         <EyeOutlined onClick={togglePasswordVisibility} className="eye-icon text-white" />
                     )}
+                    
                 </div>
                 {isSignup && (
+                    <>
                     <div className="password-container">
+                    
                         <input
                             type={showConfirmPassword ? "text" : "password"}
                             placeholder="Confirm Password"
@@ -122,13 +162,25 @@ const TeamLeadAuth = () => {
                         ) : (
                             <EyeOutlined onClick={toggleConfirmPasswordVisibility} className="eye-icon text-white" />
                         )}
+                        
                     </div>
+                   
+                    
+                    <label><>Profile Pic</></label>
+                        <input type="file" accept="image/*" onChange={handleFileChange}  />
+                        
+                    </>
                 )}
                 <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
+                <center><Link to='/forgot'>Forgot Password?</Link></center>
                 <p onClick={switchMode}>
                     {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
                 </p>
+               
+                
+                
             </form>
+            
 
             <style>{`
                 .team-lead-auth {
@@ -137,17 +189,40 @@ const TeamLeadAuth = () => {
                     align-items: center;
                     height: 100vh;
                     background-color: #f4f4f4;
+                    padding:20px;
+                    width:100%;
+                    margin:20px;
+                    
                 }
                 form {
                     background-color: white;
-                    padding: 30px;
+                    padding:30px;
+                    margin:30px;
+                    border-radius: 10px;
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
                     border-radius: 8px;
-                    width: 400px;
+                    width: 500px;
                     display: flex;
                     flex-direction: column;
-                    gap: 15px;
+                    gap:5px;
                 }
+
+                
+                .back-button {
+                background: none;
+                border: none;
+                color: #007bff;
+                font-size: 16px;
+                cursor: pointer;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                }
+
+                .back-button svg {
+                margin-right: 5px;
+                }
+
                 .password-container {
                     position: relative;
                     display: flex;
