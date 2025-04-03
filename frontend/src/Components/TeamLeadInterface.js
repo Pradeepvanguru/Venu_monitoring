@@ -1,15 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,navigate } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { ProgressBar as BootstrapProgressBar } from 'react-bootstrap';
 import Sidebar from './Sidebar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './TeamLeadInterface.css';
+import { notification } from 'antd';
+import { useNavigate } from 'react-router-dom';
+
 
 const TeamLeadInterface = () => {
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState('');
+    const navigate=useNavigate()
     const token = localStorage.getItem('userToken'); // Retrieve token from localStorage
+
+     useEffect(() => {
+            const token = localStorage.getItem("userToken");
+    
+            if (!token) {
+                notification.warning({ message: "Session expired!" ,
+                    description: "You are not logged in. Please log in to continue." ,
+                });
+                navigate("/");
+            }
+        }, []);
 
     // Function to fetch tasks from the API
     const fetchTasks = async () => {
@@ -77,6 +92,8 @@ const TeamLeadInterface = () => {
     useEffect(() => {
         fetchTasks();
     }, []);
+
+
 
     return (
         <div className="team-lead-interface">

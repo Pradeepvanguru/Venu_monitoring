@@ -1,6 +1,6 @@
 // src/App.js
-import React, { useState,useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState,useEffect,navigate } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Home from './Components/Home';
 import About from './Components/About';
 import Contact from './Components/Contact';
@@ -17,11 +17,15 @@ import TaskModules from './Components/EmployeeInterface';
 import { ToastContainer } from 'react-toastify';
 import Profile from './ChatsComponents/Profile';
 import ForgotPassword from './Components/forgot';
+import { notification } from 'antd';
+
 
 
 const App = () => {
     // State for authentication
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate=useNavigate()
+    
 
     // Handle logout logic
     const handleLogout = () => {
@@ -52,6 +56,17 @@ const App = () => {
           window.removeEventListener("beforeunload", handleBeforeUnload);
         };
       }, []);
+
+      useEffect(() => {
+        const token = localStorage.getItem("userToken");
+
+        if (!token) {
+             notification.warning({ message: "Session expired!" ,
+                                description: "You are not logged in. Please log in to continue." ,})
+            navigate("/");
+        }
+    }, []);
+
 
     return (
         <NavbarWrapper>

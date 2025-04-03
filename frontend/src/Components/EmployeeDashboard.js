@@ -7,12 +7,25 @@ import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './TeamLeadInterface.css';
+import { notification } from 'antd';
+
 
 const EmployeeDashboard = () => {
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState('');
     const navigate = useNavigate(); // Initialize navigation
     const token=localStorage.getItem('userToken')
+
+     useEffect(() => {
+            const token = localStorage.getItem("userToken");
+    
+            if (!token) {
+                notification.warning({ message: "Session expired!" ,
+                    description: "You are not logged in. Please log in to continue." ,
+                });
+                navigate("/");
+            }
+        }, []);
 
     useEffect(() => {
         fetchTasks();

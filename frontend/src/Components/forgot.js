@@ -68,9 +68,9 @@ const ForgotPassword = () => {
   
   const styles = {
     container: {
-      width: "300px",
+      width: "500px",
       margin: "50px auto",
-      padding: "20px",
+      padding: "30px",
       textAlign: "center",
       border: "1px solid #ccc",
       borderRadius: "10px",
@@ -115,7 +115,9 @@ const ForgotPassword = () => {
       cursor: "pointer",
       fontSize: "18px",
     },
-  };
+    
+    
+  }
 
   return (
     <div style={styles.container}>
@@ -123,6 +125,7 @@ const ForgotPassword = () => {
       {step === "forgot" && (
         <form onSubmit={handleForgotSubmit} style={styles.form}>
           <h4>Forgot Password</h4>
+          <label>Enter Email:</label>
           <input
             type="email"
             placeholder="Enter your email"
@@ -140,6 +143,7 @@ const ForgotPassword = () => {
       {step === "otp" && (
         <form onSubmit={handleOtpSubmit} style={styles.form}>
           <h4>Verify OTP</h4>
+          
           <input
             type="text"
             placeholder="Enter OTP"
@@ -175,6 +179,14 @@ const ForgotPassword = () => {
           </button>
         </form>
       )}
+      <style>
+        {
+          `label{
+          margin-left:-930px;
+          }
+          `
+        }
+      </style>
     </div>
   );
 };

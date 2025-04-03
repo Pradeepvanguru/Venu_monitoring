@@ -27,8 +27,8 @@ const EmployeeSidebar = () => {
             </div>
             <nav className="sidebar-nav">
                 <Link to="/employee-dashboard" onClick={handlerefresh}>Dashboard</Link>
-                <Link to="/profile" className="dropdown-item">Profile</Link>
-                <Link to="/queries">Queries</Link>
+                <Link to="/profile" className="dropdown-item">Profile &gt;</Link>
+                 <Link to="/queries">Team Chats &gt;</Link>
                 <button className="logout-btn" onClick={handleLogout}>Logout</button>
             </nav>
         </aside>

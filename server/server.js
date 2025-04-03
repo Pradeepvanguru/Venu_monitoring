@@ -12,6 +12,8 @@ const Data = require('./models/Data'); // Import your Data model
 const messageRoutes = require('./routes/messageRoutes');
 const http = require('http');
 const { Server } = require('socket.io');
+const authMiddleware = require('./middleware/authMiddleware');
+
 
 dotenv.config();  // Load environment variables
 

@@ -28,7 +28,7 @@ const ProfilePage = () => {
 
     useEffect(() => {
         if (!token) {
-            navigate('/login');
+            navigate('/');
             return;
         
         }
@@ -81,15 +81,23 @@ const ProfilePage = () => {
             await axios.put(`${process.env.REACT_APP_URL}/auth/api/updateProfile`, updatedData, {
                 headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${token}` }
             });
-            notification.success({ message: "Profile updated successfully!" });
             setOldUser({ ...oldUser, ...updatedData });
-            setShowPasswordFields(false)
+
+             // ✅ Update specific localStorage values
+        if (updatedData.email) localStorage.setItem("loggedInEmail", updatedData.email);
+        if (updatedData.team_id) localStorage.setItem("team_id", updatedData.team_id);
+        if (updatedData.name) localStorage.setItem("userName", updatedData.name);
+        if (updatedData.role) localStorage.setItem("userRole", updatedData.role);
+        if (token) localStorage.setItem("userToken", token);
+        
+        notification.success({ message: "Profile updated successfully!" });
+            
         } catch (error) {
             notification.error({ message: "Error updating profile." });
            
         }
     };
-
+   
     const handlePasswordChange = async (e) => {
         e.preventDefault();
         try {
@@ -124,6 +132,7 @@ const ProfilePage = () => {
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+    
 
     return (
         <div className="profile-container">
@@ -143,8 +152,9 @@ const ProfilePage = () => {
                     )}
                 </div>
                 <p><strong>Team_id:</strong> {user.team_id}</p>
-                <p><strong>Role:</strong> {user.role}</p>
-                <p><strong>Name:</strong> {user.name}</p>
+                <p><strong>Role:</strong> {user.role.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}</p>
+                <p><strong>Name:</strong> {user.name.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}</p>
+
                 <p><strong>Email:</strong> {user.email}</p>
                
              <button className="delete-button" onClick={handleDeleteAccount}>

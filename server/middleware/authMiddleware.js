@@ -42,7 +42,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const authMiddleware = async (req, res, next) => {
-    const token = req.header("Authorization");
+    // const token = req.header("Authorization");
+    const token = req.headers.authorization?.split(" ")[1]; // Extract token
     if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
 
     try {
@@ -57,7 +58,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         // Store only essential user data in req.user
-        req.user = { id: user._id, role: user.role,email: user.email,name:user.name };
+        req.user = { id: user._id, role: user.role,email: user.email,name:user.name,team_id:user.team_id};
 
         // console.log('User authenticated:', req.user);
 
@@ -70,6 +71,9 @@ const authMiddleware = async (req, res, next) => {
 
         next();
     } catch (err) {
+        if (err.name === "TokenExpiredError") {
+            return res.status(401).json({ message: "Session expired. Please log in again." });
+        }
         res.status(400).json({ error: "Invalid token." });
     }
 };
