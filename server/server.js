@@ -13,6 +13,8 @@ const messageRoutes = require('./routes/messageRoutes');
 const http = require('http');
 const { Server } = require('socket.io');
 const authMiddleware = require('./middleware/authMiddleware');
+const Message = require('./models/Message'); // Import the Message model
+
 
 
 dotenv.config();  // Load environment variables
@@ -29,8 +31,10 @@ app.use(cors({
   methods: ['GET', 'POST', 'DELETE','UPDATE','PUT'],  // Allow GET, POST, DELETE methods
   credentials: true  // Allow credentials (cookies, authorization headers, etc.)
 }));
+
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server, { cors: {  origin: "http://localhost:3000", // Adjust for frontend
+  methods: ["GET", "POST",'DELETE','UPDATE'], } });
 
 // Route setup
 app.use('/auth', authRoutes);  // Authentication routes
@@ -39,16 +43,32 @@ app.use('/api/messages', messageRoutes);
 
 
 
-// WebSocket connection
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
 
-  socket.on('sendMessage', (data) => {
-      io.emit('receiveMessage', data); // Broadcast message
-  });
+// 🔥 SERVER SIDE
+    io.on('connection', (socket) => {
+      console.log('User connected:', socket.id);
+
+      // ✅ Listen for a custom event to join room
+      socket.on('join', (userId) => {
+        socket.join(userId); // join a room with user's ID
+        console.log(`User ${userId} joined room`);
+      });
+
+      socket.on('sendMessage', async (data) => {
+        try {
+          const newMessage = new Message(data);
+          const savedMessage = await newMessage.save();
+
+          // ✅ Send to both sender and receiver rooms
+          io.to(data.receiver).emit('receiveMessage', savedMessage);
+          io.to(data.sender).emit('receiveMessage', savedMessage);
+        } catch (err) {
+          console.error("Message save error:", err);
+        }
+      });
 
   socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
+    console.log('User disconnected:', socket.id);
   });
 });
 
@@ -111,4 +131,4 @@ app.get('/api/view-file/:moduleId/:dayIndex', async (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

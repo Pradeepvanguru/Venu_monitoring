@@ -181,3 +181,8 @@ const FileModules = () => {
 
 export default FileModules;
 
+the message process is not working good check once ,when user send the message
+ then it show in right side in sender side but  it shows both are same same side 
+ when user refresh it and i want add more fetures for the manipulating options 
+ like delete,edit,sigle tick and double tick ,send files in  inputs filed, disply pic 
+ and give good internal css styling like whatsaap app

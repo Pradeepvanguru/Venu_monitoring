@@ -14,14 +14,17 @@ import FileModules from './Components/FileModules';
 // import Deadlines from './Components/Deadlines';
 import ChatPage from './ChatsComponents/ChatPage';
 import TaskModules from './Components/EmployeeInterface';
-import { ToastContainer } from 'react-toastify';
 import Profile from './ChatsComponents/Profile';
 import ForgotPassword from './Components/forgot';
 import { notification } from 'antd';
+import useSessionManagement from './sessionExpiry';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 
 const App = () => {
+    useSessionManagement()
     // State for authentication
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate=useNavigate()
@@ -45,27 +48,7 @@ const App = () => {
             </>
         );
     };
-    useEffect(() => {
-        const handleBeforeUnload = () => {
-          localStorage.clear();  // Clears all stored data
-        };
-    
-        window.addEventListener("beforeunload", handleBeforeUnload);
-    
-        return () => {
-          window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-      }, []);
 
-      useEffect(() => {
-        const token = localStorage.getItem("userToken");
-
-        if (!token) {
-             notification.warning({ message: "Session expired!" ,
-                                description: "You are not logged in. Please log in to continue." ,})
-            navigate("/");
-        }
-    }, []);
 
 
     return (

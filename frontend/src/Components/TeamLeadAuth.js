@@ -16,7 +16,6 @@ const TeamLeadAuth = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
      const [profile,setProfilePic]=useState(null)
-     const [file, setFile] = useState(null);
     const navigate = useNavigate();
 
     const switchMode = () => {
@@ -24,11 +23,9 @@ const TeamLeadAuth = () => {
     };
     const handleFileChange = (e) => {
         setProfilePic(e.target.files[0]);
-        if (setProfilePic) {
-            setFile(setProfilePic);
-          }
+       
     };
-
+ 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
@@ -39,7 +36,7 @@ const TeamLeadAuth = () => {
 
     const handleAuth = async (e) => {
         e.preventDefault();
-        const authData = { email, password, role: 'team-lead', name,profile };
+        const authData = { email, password, role: 'team-lead', name, profile };
     
         if (isSignup) {
             if (password !== confirmPassword) {
