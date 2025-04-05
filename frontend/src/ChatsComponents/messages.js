@@ -120,222 +120,257 @@ const Messages = ({ messages, setMessages }) => {
 
     return (
         <div className="messages">
-        <center className='text-secondary'><i>Your messages are end-to-end encrypted🔒, Not accessible to anyone. Your conversation is private.</i></center>
-            {messages.length > 0 ? (
-                messages.map((msg) => (
-                    <div key={msg._id} className={msg.sender === localStorage.getItem('loggedInUserId') ? 'sent' : 'received'}>
-                        {editingMessageId === msg._id && msg.sender === localStorage.getItem('loggedInUserId') ? (
-                                    <>
-                                    <textarea
-                                    style={{
-                                    resize: 'none',
-                                    overflow: 'hidden',
-                                    borderRadius: '20px',
-                                    padding: '10px 15px',
-                                    width: '100%',
-                                    fontSize: '14px',
-                                    maxHeight: '150px',
-                                    border: '1px solid #ccc',
-                                    outline: 'none',
-                                    backgroundColor: '#f0f0f0'
-                                }}
-                                    className="edit-textarea"
-                                    rows={1}
-                                    value={editedMessages[msg._id]}
-                                    onChange={(e) =>
-                                        setEditedMessages((prevMessages) => ({
-                                            ...prevMessages,
-                                            [msg._id]: e.target.value,
-                                        }))
-                                    }
-                                    onInput={(e) => {
-                                        e.target.style.height = 'auto';
-                                        e.target.style.height = `${e.target.scrollHeight}px`;
-                                    }}
-                                    placeholder="Edit your message..."
-                                />
-
-                                        <button className='bg-success rounded text-white px-1 m-1 border' onClick={() => saveEditedMessage(msg._id)}><FontAwesomeIcon icon={faCheck}  /></button>
-                                    </>
-                        ) : (
-                            <>  
-                                <span>{msg.message}</span>
-                                {msg.edited && (
-                                <span style={{ fontSize: '10px', marginLeft: '5px', fontStyle: 'italic' }}>
-                                    <i className='text-dark'>(edited)</i>
-                                </span>
-                                  )}
-                                
-                                    <br></br>
-                                <span className="timestamp">
-                                  {new Date(msg.timestamp  ).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} |  
-                                  {new Date(msg.timestamp ).toLocaleDateString('en-GB')}
-                                </span>
-                                <span className={`tick ${msg.isRead ? 'double-tick' : 'single-tick'}`}>
-                                    {msg.isRead ? '✔✔' : '✔'}
-                                </span>
-                                {msg.sender === localStorage.getItem('loggedInUserId') && (
-                                <div className="menu-container">
-                                    <FaEllipsisV className='menu-icon' onClick={() => toggleMenu(msg._id)} />
-                                    {openMenuId === msg._id && (
-                                        <div className="dropdown-menu">
-                                            <button onClick={() => editMessage(msg)}><FaEdit /> Edit</button>
-                                            <button onClick={() => deleteMessage(msg._id)}><FaTrash /> Delete</button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            </>
-                        )}
+        <center className='text-secondary'>
+          <i>Your messages are end-to-end encrypted🔒, Not accessible to anyone. Your conversation is private.</i>
+        </center> 
+        {messages.length > 0 ? (
+          messages.map((msg) => (
+            <div key={msg._id} className={msg.sender === localStorage.getItem('loggedInUserId') ? 'sent' : 'received'}>
+              {editingMessageId === msg._id && msg.sender === localStorage.getItem('loggedInUserId') ? (
+                <>
+                  <textarea
+                    style={{
+                      resize: 'none',
+                      overflow: 'hidden',
+                      borderRadius: '20px',
+                      padding: '10px 15px',
+                      width: '100%',
+                      fontSize: '14px',
+                      maxHeight: '150px',
+                      border: '1px solid #ccc',
+                      outline: 'none',
+                      backgroundColor: '#f0f0f0'
+                    }}
+                    className="edit-textarea"
+                    rows={1}
+                    value={editedMessages[msg._id]}
+                    onChange={(e) =>
+                      setEditedMessages((prevMessages) => ({
+                        ...prevMessages,
+                        [msg._id]: e.target.value,
+                      }))
+                    }
+                    onInput={(e) => {
+                      e.target.style.height = 'auto';
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
+                    placeholder="Edit your message..."
+                  />
+                  <button
+                    className='bg-success rounded text-white px-1 m-1 border'
+                    onClick={() => saveEditedMessage(msg._id)}
+                  >
+                    <FontAwesomeIcon icon={faCheck} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* ✅ Render message text if present */}
+                  {msg.message && <span>{msg.message}</span>}
+      
+                  {/* ✅ Render file preview or download if present */}
+                  {msg.files && (
+                    <div style={{ marginTop: '8px' }}>
+                      {(msg.files.endsWith('.jpg') || msg.files.endsWith('.png')) ? (
+                        <img
+                          src={`${process.env.REACT_APP_URL}/api/messages/files/${msg.files}`}
+                          alt="Uploaded"
+                          style={{ maxWidth: '300px', borderRadius: '10px' }}
+                        />
+                      ) : (
+                        <a
+                          href={`${process.env.REACT_APP_URL}/api/messages/files/${msg.files}`}
+                          download
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Download File
+                        </a>
+                      )}
                     </div>
-                ))
-            ) : (
-                <center className='text-secondary'><i>Your messages are end-to-end encrypted🔒, Not accessible to anyone. Your conversation is private.</i></center>
-            )}
-            <Tooltip anchorSelect='.bg-success' place='right'>save</Tooltip>
-            <div ref={bottomRef} />
-            
-           
-               {/* 👇 This will scroll into view on every new message */}
-           
+                  )}
+      
+                  {/* ✅ Edited badge */}
+                  {msg.edited && (
+                    <span style={{ fontSize: '10px', marginLeft: '5px', fontStyle: 'italic' }}>
+                      <i className='text-dark'>(edited)</i>
+                    </span>
+                  )}
+      
+                  <br />
+      
+                  {/* ✅ Timestamp */}
+                  <span className="timestamp">
+                    {new Date(msg.timestamp).toLocaleTimeString('en-GB', {hour: '2-digit',minute: '2-digit', hour12: true})} |
+                    {new Date(msg.timestamp).toLocaleDateString('en-GB')}
+                  </span>
+      
+                  {/* ✅ Read status */}
+                  <span className={`tick ${msg.isRead ? 'double-tick' : 'single-tick'}`}>
+                    {msg.isRead ? '✔✔' : '✔'}
+                  </span>
+      
+                  {/* ✅ Edit/Delete menu */}
+                  {msg.sender === localStorage.getItem('loggedInUserId') && (
+                    <div className="menu-container">
+                      <FaEllipsisV className='menu-icon' onClick={() => toggleMenu(msg._id)} />
+                      {openMenuId === msg._id && (
+                        <div className="dropdown-menu">
+                          <button onClick={() => editMessage(msg)}><FaEdit /> Edit</button>
+                          <button onClick={() => deleteMessage(msg._id)}><FaTrash /> Delete</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))
+        ) : (
+          <center className='text-secondary'>
+            <i>Your messages are end-to-end encrypted🔒, Not accessible to anyone. Your conversation is private.</i>
+          </center>
+        )}
 
-               <style>
-{`
-.text-secondary {
-    font-size: 10px;
-}
+         <style>
+                    { 
+                        `
+                    .text-secondary {
+                        font-size: 10px;
+                    }
 
-.messages {
-    flex: 2;
-    padding: 15px;
-    overflow-y: auto;
-    margin: 5px;
-    font-size: 14px;
-    border-radius: 5px;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://wallpapercave.com/wp/wp9346845.jpg");
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    max-height: 80vh;
-    height: auto;
-}
+                    .messages {
+                        flex: 2;
+                        padding: 15px;
+                        overflow-y: auto;
+                        margin: 5px;
+                        font-size: 14px;
+                        border-radius: 5px;
+                        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://wallpapercave.com/wp/wp9346845.jpg");
+                        background-size: cover;
+                        background-position: center;
+                        display: flex;
+                        flex-direction: column;
+                        max-height: 80vh;
+                        height: auto;
+                    }
 
-/* Hide scrollbars for all browsers */
-.messages::-webkit-scrollbar {
-    display: none;
-}
-.messages {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
+                    /* Hide scrollbars for all browsers */
+                    .messages::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .messages {
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                    }
 
-.sent, .received {
-    position: relative;
-    padding: 10px 14px;
-    border-radius: 15px;
-    margin: 6px 10px;
-    max-width: 70%;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    line-height: 1.4;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-}
+                    .sent, .received {
+                        position: relative;
+                        padding: 10px 14px;
+                        border-radius: 15px;
+                        margin: 6px 10px;
+                        max-width: 70%;
+                        word-wrap: break-word;
+                        white-space: pre-wrap;
+                        line-height: 1.4;
+                        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+                    }
 
-.sent {
-    background-color: #d1f7c4;
-    align-self: flex-end;
-    text-align: left;
-    color: #000;
-}
+                    .sent {
+                        background-color: #d1f7c4;
+                        align-self: flex-end;
+                        text-align: left;
+                        color: #000;
+                    }
 
-.received {
-    background-color: #fff;
-    align-self: flex-start;
-    text-align: left;
-    color: #000;
-}
+                    .received {
+                        background-color: #fff;
+                        align-self: flex-start;
+                        text-align: left;
+                        color: #000;
+                    }
 
-.timestamp {
-    font-size: 10px;
-    color: #555;
-    margin-top: 5px;
-    display: inline-block;
-}
+                    .timestamp {
+                        font-size: 10px;
+                        color: #555;
+                        margin-top: 5px;
+                        display: inline-block;
+                    }
 
-.tick {
-    font-size: 14px;
-    margin-left: 5px;
-}
+                    .tick {
+                        font-size: 14px;
+                        margin-left: 5px;
+                    }
 
-.single-tick {
-    color: #555;
-}
-.double-tick {
-    color: blue;
-}
+                    .single-tick {
+                        color: #555;
+                    }
+                    .double-tick {
+                        color: blue;
+                    }
 
-.menu-container {
-    position: relative;
-    display: inline-block;
-    margin-left: 10px;
-}
+                    .menu-container {
+                        position: relative;
+                        display: inline-block;
+                        margin-left: 10px;
+                    }
 
-.menu-icon {
-    cursor: pointer;
-    float: right;
-    margin-left: 10px;
-}
+                    .menu-icon {
+                        cursor: pointer;
+                        float: right;
+                        margin-left: 10px;
+                    }
 
-.dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 20px;
-    background: white;
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
-    background: #444;
-    color: white;
-}
+                    .dropdown-menu {
+                        position: absolute;
+                        right: 0;
+                        top: 20px;
+                        background: white;
+                        box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+                        border-radius: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        z-index: 10;
+                        background: #444;
+                        color: white;
+                    }
 
-.dropdown-menu button {
-    padding: 6px 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: white;
-    width: 100%;
-    text-align: left;
-}
+                    .dropdown-menu button {
+                        padding: 6px 12px;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        color: white;
+                        width: 100%;
+                        text-align: left;
+                    }
 
-.dropdown-menu button:hover {
-    background: rgba(185, 191, 185, 0.51);
-}
+                    .dropdown-menu button:hover {
+                        background: rgba(185, 191, 185, 0.51);
+                    }
 
-/* Textarea for editing */
-input[type="text"] {
-    width: 100%;
-    padding: 6px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    outline: none;
-    resize: vertical;
-    min-height: 30px;
-    max-height: 120px;
-    overflow-y: auto;
-    font-size: 14px;
-}
-`}
+                    /* Textarea for editing */
+                    input[type="text"] {
+                        width: 100%;
+                        padding: 6px;
+                        border-radius: 8px;
+                        border: 1px solid #ccc;
+                        outline: none;
+                        resize: vertical;
+                        min-height: 30px;
+                        max-height: 120px;
+                        overflow-y: auto;
+                        font-size: 14px;
+                    }
+                    `}
                 </style>
-
-        </div>
+      </div>
+      
     );
 };
 
 export default Messages;
+

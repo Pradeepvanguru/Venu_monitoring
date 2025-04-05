@@ -36,6 +36,7 @@ const Sidebar = () => {
         navigate('/');
     };
     const handlerefresh = () => {
+        navigate('/team-lead-interface')
         window.location.reload();
     };
 

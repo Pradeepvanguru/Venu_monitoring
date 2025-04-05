@@ -135,3 +135,142 @@ const EmployeeInterface = () => {
 };
 
 export default EmployeeInterface;
+
+
+
+-----------------------------------------------------------------------------------------------------------------
+<style>
+                    { 
+                        `
+                    .text-secondary {
+                        font-size: 10px;
+                    }
+
+                    .messages {
+                        flex: 2;
+                        padding: 15px;
+                        overflow-y: auto;
+                        margin: 5px;
+                        font-size: 14px;
+                        border-radius: 5px;
+                        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://wallpapercave.com/wp/wp9346845.jpg");
+                        background-size: cover;
+                        background-position: center;
+                        display: flex;
+                        flex-direction: column;
+                        max-height: 80vh;
+                        height: auto;
+                    }
+
+                    /* Hide scrollbars for all browsers */
+                    .messages::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .messages {
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                    }
+
+                    .sent, .received {
+                        position: relative;
+                        padding: 10px 14px;
+                        border-radius: 15px;
+                        margin: 6px 10px;
+                        max-width: 70%;
+                        word-wrap: break-word;
+                        white-space: pre-wrap;
+                        line-height: 1.4;
+                        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .sent {
+                        background-color: #d1f7c4;
+                        align-self: flex-end;
+                        text-align: left;
+                        color: #000;
+                    }
+
+                    .received {
+                        background-color: #fff;
+                        align-self: flex-start;
+                        text-align: left;
+                        color: #000;
+                    }
+
+                    .timestamp {
+                        font-size: 10px;
+                        color: #555;
+                        margin-top: 5px;
+                        display: inline-block;
+                    }
+
+                    .tick {
+                        font-size: 14px;
+                        margin-left: 5px;
+                    }
+
+                    .single-tick {
+                        color: #555;
+                    }
+                    .double-tick {
+                        color: blue;
+                    }
+
+                    .menu-container {
+                        position: relative;
+                        display: inline-block;
+                        margin-left: 10px;
+                    }
+
+                    .menu-icon {
+                        cursor: pointer;
+                        float: right;
+                        margin-left: 10px;
+                    }
+
+                    .dropdown-menu {
+                        position: absolute;
+                        right: 0;
+                        top: 20px;
+                        background: white;
+                        box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+                        border-radius: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        z-index: 10;
+                        background: #444;
+                        color: white;
+                    }
+
+                    .dropdown-menu button {
+                        padding: 6px 12px;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        color: white;
+                        width: 100%;
+                        text-align: left;
+                    }
+
+                    .dropdown-menu button:hover {
+                        background: rgba(185, 191, 185, 0.51);
+                    }
+
+                    /* Textarea for editing */
+                    input[type="text"] {
+                        width: 100%;
+                        padding: 6px;
+                        border-radius: 8px;
+                        border: 1px solid #ccc;
+                        outline: none;
+                        resize: vertical;
+                        min-height: 30px;
+                        max-height: 120px;
+                        overflow-y: auto;
+                        font-size: 14px;
+                    }
+                    `}
+                </style>

@@ -17,12 +17,15 @@ const TeamLeadAuth = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
      const [profile,setProfilePic]=useState(null)
     const navigate = useNavigate();
+    const [fileName,setFileName]=useState()
 
     const switchMode = () => {
         setIsSignup((prevIsSignup) => !prevIsSignup);
     };
     const handleFileChange = (e) => {
-        setProfilePic(e.target.files[0]);
+        const file=(e.target.files[0]);
+        setFileName(file.name)
+        setProfilePic(file)
        
     };
  
@@ -40,7 +43,7 @@ const TeamLeadAuth = () => {
     
         if (isSignup) {
             if (password !== confirmPassword) {
-                notification.error({
+                notification.warning({
                     message: 'Error',
                     description: 'Passwords do not match!',
                 });
@@ -57,9 +60,9 @@ const TeamLeadAuth = () => {
                 });
                 setIsSignup(false);
             } catch (error) {
-                notification.error({
+                notification.warning({
                     message: 'Signup Failed',
-                    description: error.response?.data?.message || 'Something went wrong. Please try again.',
+                    description: error.response?.data?.message,
                 });
             }
         } else {
@@ -83,26 +86,6 @@ const TeamLeadAuth = () => {
             }
         }
     };
-    // const styles = {
-    //     container: {
-    //       display: "flex",
-    //       flexDirection: "column",
-    //       alignItems: "center",
-    //       marginTop: "20px",
-    //     },
-    //     input: {
-    //       padding: "8px",
-    //       border: "1px solid #ccc",
-    //       borderRadius: "5px",
-    //     },
-    //     fileInfo: {
-    //       marginTop: "10px",
-    //       fontSize: "16px",
-    //       color: "green",
-    //       fontWeight: "bold",
-    //     },
-    //   };
-    
     return (
         <div className="team-lead-auth">
             <form onSubmit={handleAuth}>
@@ -163,8 +146,8 @@ const TeamLeadAuth = () => {
                     </div>
                    
                     
-                    <label><>Profile Pic</></label>
-                        <input type="file" accept="image/*" onChange={handleFileChange}  />
+                    <label><>Profile Pic:</></label>
+                    <input className='bg-secondary' type="file" accept="image/*" onChange={handleFileChange} placeholder={fileName}  />
                         
                     </>
                 )}
@@ -194,7 +177,7 @@ const TeamLeadAuth = () => {
                 form {
                     background-color: white;
                     padding:30px;
-                    margin:30px;
+                    margin:10px;
                     border-radius: 10px;
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
                     border-radius: 8px;

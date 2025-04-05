@@ -4,6 +4,31 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware'); 
 const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+
+
+// Multer setup for image uploads
+const storage = multer.diskStorage({
+    destination: './uploads/',
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
+
+router.get('/files/:filename', (req, res) => {
+    const filePath = path.join(__dirname, '..', 'uploads', req.params.filename);
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+        res.sendFile(filePath);
+    });
+});
 
 // ✅ Get chat list (employees for team leaders, vice versa)
 router.get('/chat-list',authMiddleware, async (req, res) => {
@@ -14,7 +39,7 @@ router.get('/chat-list',authMiddleware, async (req, res) => {
         // console.log("Chat_Names:",email)
 
         if (!users.length) {
-            return res.status(403).json({ error: 'No users found or unauthorized access.' });
+            return res.status(403).json({ error: 'No users found' });
         }
         
         res.json(users);
@@ -29,18 +54,22 @@ router.get('/messages/:userId', authMiddleware, async (req, res) => {
     try {
         const { userId } = req.params;
         
-        const messages = await Message.find({
+        const newMessage = await Message.find({
             $or: [
                 { sender: req.user.id, receiver: userId },
                 { sender: userId, receiver: req.user.id }
             ]
         }).sort({ timestamp: 1 }); 
 
+        const messagesWithFileURLs = newMessage.map(msg => ({
+            ...msg._doc,
+            fileUrl: msg.files ? `${req.protocol}://${req.get('host')}/api/messages/files/${msg.files}` : null
+        }));
+
         // console.log("userId:",req.user.id)
         const user = await User.findById(userId);
-
         const client=req.user.id
-        res.json({ messages, user,client });
+        res.json({ messages:messagesWithFileURLs, user,client,msgid:newMessage._id  });
     } catch (error) {
         console.error('Error fetching messages:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -48,19 +77,23 @@ router.get('/messages/:userId', authMiddleware, async (req, res) => {
 });
 
 // ✅ Send a message
-router.post('/send', authMiddleware, async (req, res) => {
+router.post('/send', upload.single('files'), authMiddleware, async (req, res) => {
+    
     try {
         const { receiver, message } = req.body;
+        const fileUrl = req.file ? req.file.filename : null;
+
         const newMessage = new Message({
             sender: req.user.id,
             receiver,
             message,
-            timestamp:new Date(),
+            timestamp: new Date(),
+            files: fileUrl,
         });
 
         await newMessage.save();
-        // console.log("userid:",newMessage._id)
-        res.json({ success: true, message: newMessage,msgid:newMessage._id });
+
+        res.json({ success: true, message: newMessage, msgid: newMessage._id });
     } catch (error) {
         console.error('Error sending message:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -68,11 +101,13 @@ router.post('/send', authMiddleware, async (req, res) => {
 });
 
 
+
 router.put('/messages/:messageId', authMiddleware, async (req, res) => {
     try {
         const { messageId } = req.params;
         const { newMessage } = req.body;
         // console.log("id:",messageId)
+
         const updatedMessage = await Message.findByIdAndUpdate(messageId,{ message: newMessage, edited:true },{ new: true });
         if (!updatedMessage) {
             return res.status(404).json({ error: 'Message not found' });

@@ -15,10 +15,16 @@ const CreateTask = () => {
     const [endDate, setEndDate] = useState('');
     const [taskFile, setTaskFile] = useState(null);
     const [moduleId, setModuleId] = useState('');
+    const [fileName,setfileName]=useState('')
     const navigate = useNavigate();
 
+
     const handleFileChange = (e) => {
-        setTaskFile(e.target.files[0]);
+       const file=(e.target.files[0]);
+       if(file){
+        setfileName(file.name)
+        setTaskFile(file)
+       }
     };
 
     
@@ -90,12 +96,14 @@ const CreateTask = () => {
                 />
 
                 <label>Project Documents</label>
-                <input
+                <input  className='bg-secondary rounded'
                     type="file"
                     accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
                     onChange={handleFileChange}
+                    placeholder={fileName}
                     required
                 />
+                {/* {fileName && <p>Selected file: {fileName}</p>} */}
 
                 <label>Start Date</label>
                 <input

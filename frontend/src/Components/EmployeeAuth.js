@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { message, notification } from 'antd';
+import {  notification } from 'antd';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import { ToastContainer } from 'react-toastify';
 
 const EmployeeAuth = () => {
     const [email, setEmail] = useState('');
@@ -18,12 +18,18 @@ const EmployeeAuth = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [profile,setProfilePic]=useState(null)
     const navigate = useNavigate();
+    const [fileName, setFileName] = useState('');
+   
 
     const switchMode = () => {
         setIsSignup((prevIsSignup) => !prevIsSignup);
     };
     const handleFileChange = (e) => {
-        setProfilePic(e.target.files[0]);
+        const file=e.target.files[0];
+        if (file) {
+            setProfilePic(file);
+            setFileName(file.name) // sets file name
+          }
     };
 
 
@@ -33,8 +39,8 @@ const EmployeeAuth = () => {
 
         if (isSignup) {
             if (password !== confirmPassword) {
-                notification.error({
-                    message: 'Error',
+                notification.warning({
+                    message: 'Password Error',
                     description: 'Passwords do not match!',
                 });
                 return;
@@ -53,11 +59,11 @@ const EmployeeAuth = () => {
                 });
                 setIsSignup(false);
             } catch (error) {
-                notification.error({
+                notification.warning({
                     message: 'Signup Failed',
-                    description: error.response?.data?.message || 'Signup failed. Please try again.',
+                    description: error.response?.data?.message,
                 });
-                console.error(error.response?.data?.message || 'Signup failed. Please try again.');
+                
             }
         } else {
             try {
@@ -73,11 +79,11 @@ const EmployeeAuth = () => {
                     description: 'Welcome to Employee Panel'
                 });
             } catch (error) {
-                notification.error({
+                notification.warning({
                     message: 'Error',
-                    description: error.response?.data?.message || 'Login failed. Please try again.',
+                    description: error.response?.data?.message,
                 });
-                console.error(error.response?.data?.message || 'Login failed. Please try again.');
+              
             }
         }
     };
@@ -87,6 +93,7 @@ const EmployeeAuth = () => {
     return (
         <div className="employee-auth">
             <form onSubmit={handleAuth}>
+             <ToastContainer position="top-right" autoClose={3000} />
               <button onClick={() => window.history.back()} className="back-button">
                             <FontAwesomeIcon icon={faArrowLeft} /> Back
                         </button>
@@ -107,7 +114,9 @@ const EmployeeAuth = () => {
                             onChange={(e) => setTeamId(e.target.value)}
                             required
                         />
-                        <input type="file" accept="image/*" onChange={handleFileChange} />
+                        <label>Profile Pic:</label>
+                        <input className='bg-secondary' type="file" accept="image/*" onChange={handleFileChange} placeholder={fileName}/>
+                       
                     </>
                 )}
                 <input
@@ -160,22 +169,25 @@ const EmployeeAuth = () => {
                     align-items: center;
                     height: 100vh;
                     background-color: #f4f4f4;
-                    padding:10px;
+                    padding:20px;
                     width:100%;
+                    margin:20px;
+                    
                 }
 
                 form {
                     background-color: white;
-                    padding: 20px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    padding: 15px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.64);
                     border-radius: 8px;
-                    width: 400px;
+                    width: 500px;
                     display: flex;
+                    height:auto;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: 3px;
                 }
 
-                h2 {
+                h4 {
                     text-align: center;
                     font-size: 24px;
                     color: #333;
@@ -187,13 +199,14 @@ const EmployeeAuth = () => {
                 color: #007bff;
                 font-size: 16px;
                 cursor: pointer;
-                margin-bottom: 10px;
+                margin-top: 40px;
                 display: flex;
                 align-items: center;
                 }
 
                 .back-button svg {
                 margin-right: 5px;
+                
                 }
 
 

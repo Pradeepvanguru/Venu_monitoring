@@ -44,6 +44,12 @@ const signup = async (req, res) => {
         } else if (role === "employee" && !teamId) {
             return res.status(400).json({ message: "Team ID is required for employees" });
         }
+        else if (role === "employee" && teamId) {
+        const idverify = await User.findOne({ team_id: teamId });
+        if (!idverify) {
+        return res.status(400).json({ message: "Team ID is not In DB" });
+       }
+      }
 
         // Hash the password before saving
         const saltRounds = 10;
@@ -86,12 +92,12 @@ const login = async (req, res) => {
     try {
         const user = await User.findOne({ email,role:role});
         if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+          return res.status(400).json({ message: 'Invalid credentials or role. Please check your email and role.' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(400).json({ message: 'Invalid password.Please check once !' });
         }
 
         const payload = { user: { id: user._id, role: user.role,name:user.name ,email:user.email} };
