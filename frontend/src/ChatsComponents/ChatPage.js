@@ -299,7 +299,7 @@ const ChatPage = () => {
 
                         <div className="file-upload-container">
                         <label htmlFor="file-upload" className="file-upload-label">
-                            {fileName && <span className="tick-icon">✅</span>}
+                            {fileName && <button className="tick-icon rounded bg-secondary border-0 " onClick={()=>{setfileName(null)}}> ❌</button>}
                         </label>
                         <input
                             id="file-upload"
@@ -313,7 +313,7 @@ const ChatPage = () => {
                             className="file-name-display"
                             value={fileName}
                             disabled
-                            style={{width:'300px',marginLeft:'600px',marginTop:'2px',background:'rgba(3, 0, 13, 0.26)',borderRadius:'0rem 1rem 1rem .5rem',border:'none'}}
+                            style={{width:'300px',marginLeft:'5px',marginTop:'2px',color:"white", background:'rgba(3, 0, 13, 0.37)',borderRadius:'0rem 1rem 1rem .5rem',border:'none'}}
                             />
                         )}
                         </div>
@@ -436,7 +436,7 @@ const ChatPage = () => {
                 border-radius: 8px;
                 cursor: pointer;
                 transition: 0.3s;
-                margin-left:600px;
+                margin-left:-5px;
             }
 
             .send-btn:hover {
@@ -461,9 +461,6 @@ const ChatPage = () => {
                 align-items: stretch;
                 }
 
-                .textarea-message {
-                width: 100%;
-                }
             }
         `}</style>
 

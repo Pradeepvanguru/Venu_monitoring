@@ -92,15 +92,16 @@ const EmployeeAuth = () => {
 
     return (
         <div className="employee-auth">
-            <form onSubmit={handleAuth}>
-             <ToastContainer position="top-right" autoClose={3000} />
-              <button onClick={() => window.history.back()} className="back-button">
+            <form onSubmit={handleAuth} className="employee-auth__form">
+                 <ToastContainer position="top-right" autoClose={3000} />
+                     <button onClick={() => window.history.back()} className="back-button w-50">
                             <FontAwesomeIcon icon={faArrowLeft} /> Back
-                        </button>
-                <center><h4>{isSignup ? 'Employee Signup' : 'Employee Login'}</h4></center>
-                {isSignup && (
+                            </button>
+                  <center><h4>{isSignup ? 'Employee Signup' : 'Employee Login'}</h4></center>
+                   {isSignup && (
                     <>
                         <input
+                         className="employee-auth__input"
                             type="text"
                             placeholder="Name"
                             value={name}
@@ -113,9 +114,10 @@ const EmployeeAuth = () => {
                             value={teamId}
                             onChange={(e) => setTeamId(e.target.value)}
                             required
+                            className="employee-auth__input"
                         />
                         <label>Profile Pic:</label>
-                        <input className='bg-secondary' type="file" accept="image/*" onChange={handleFileChange} placeholder={fileName}/>
+                        <input  type="file" accept="image/*" onChange={handleFileChange} placeholder={fileName}/>
                        
                     </>
                 )}
@@ -125,143 +127,156 @@ const EmployeeAuth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="employee-auth__input"
                 />
-                <div className="password-container text-white">
+                <div className="employee-auth__password-container">
                     <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Password must be 6 or more characters"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        className="employee-auth__input"
                     />
                     
-                    <span className="eye-icon text-white" onClick={() => setShowPassword(!showPassword)}>
+                    <span className="employee-auth__eye-icon" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
                     
                 </div>
                 
                 {isSignup && (
-                    <div className="password-container ">
+                    <div className="employee-auth__password-container ">
                         <input
                             type={showConfirmPassword ? 'text' : 'password'}
                             placeholder="Confirm Password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
+                            className="employee-auth__input"
                         />
-                        <span className="eye-icon text-white" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                        <span className="employee-auth__eye-icon" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                         </span>
                     </div>
                 )}
-                <button className='actions' type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
+                <button className="employee-auth__button" type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
                 <p onClick={switchMode}>
                     {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
                 </p>
-                <center><Link to='/forgot'>Forgot Password?</Link></center>
+                <center><p><Link to='/forgot'>Forgot Password?</Link></p></center>
                 
             </form>
             <style>{`
-                .employee-auth {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    background-color: #f4f4f4;
-                    padding:20px;
-                    width:100%;
-                    margin:20px;
-                    
-                }
+    .employee-auth {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: auto;
+        background-color: #f4f4f4;
+        padding: 20px;
+        width: 100%;
+    }
 
-                form {
-                    background-color: white;
-                    padding: 15px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.64);
-                    border-radius: 8px;
-                    width: 500px;
-                    display: flex;
-                    height:auto;
-                    flex-direction: column;
-                    gap: 3px;
-                }
+    .employee-auth__form {
+        background-color: white;
+        padding: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.64);
+        border-radius: 8px;
+        width: 500px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
 
-                h4 {
-                    text-align: center;
-                    font-size: 24px;
-                    color: #333;
-                }
+    .employee-auth__form h4 {
+        text-align: center;
+        font-size: 20px;
+        color: #333;
+    }
+    .employee-auth__form label{
+      font-size:14px;
+      font-weight:200;
+    }
 
-                .back-button {
-                background: white;
-                border: none;
-                color: #007bff;
-                font-size: 16px;
-                cursor: pointer;
-                margin-top: 40px;
-                display: flex;
-                align-items: center;
-                }
+    .employee-auth .back-button {
+        background: white;
+        border: none;
+        color: #007bff;
+        font-size: 16px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
 
-                .back-button svg {
-                margin-right: 5px;
-                
-                }
+    .employee-auth .back-button svg {
+        margin-right: 5px;
+    }
 
+    .employee-auth__input {
+        padding: 10px;
+        margin: 5px 0;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        background-color: rgba(102, 104, 106, 0.55);
+        width: 100%;
+        color:rgb(22, 22, 22);
+    }
 
-                input {
-                    padding: 10px;
-                    margin: 5px 0;
-                    border: 1px solid #ccc;
-                    border-radius: 4px;
-                    font-size: 16px;
-                    background-color: rgb(102, 104, 106);
-                    width: 100%;
-                }
+    .employee-auth__password-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
 
-                .password-container {
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                }
+    .employee-auth__password-container input {
+        flex: 1;
+        padding-right: 40px;
+    }
 
-                .password-container input {
-                    flex: 1;
-                    padding-right: 40px;
-                }
+    .employee-auth__eye-icon {
+        position: absolute;
+        right: 10px;
+        cursor: pointer;
+        color: #fff;
+    }
 
-                .eye-icon {
-                    position: absolute;
-                    right: 10px;
-                    cursor: pointer;
-                    color: #666;
-                }
+    .employee-auth__button {
+        padding: 12px;
+        background-color: rgba(5, 200, 171, 0.8);
+        border: none;
+        border-radius: 4px;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+    }
 
-                .actions {
-                    padding: 12px;
-                    background-color: rgba(5, 200, 171, 0.8);
+    .employee-auth__button:hover {
+        background-color: rgba(5, 200, 171, 0.44);
+    }
+
+    .employee-auth__form p {
+        text-align: center;
+        color: #007bff;
+        cursor: pointer;
+        font-size:13px;
+    }
+
+    .employee-auth__form p:hover {
+        text-decoration: underline;
+    }
+
+    .employee-auth__form input[type="file"] {
                     border: none;
-                    border-radius: 4px;
+                    padding: 10px;
+                    background-color: rgba(84, 86, 87, 0.58);
                     color: white;
-                    font-size: 16px;
-                    cursor: pointer;
+                    border-radius: 4px;
                 }
+`}</style>
 
-                .actions:hover {
-                    background-color:rgba(5, 200, 171, 0.44);
-                }
-
-                p {
-                    text-align: center;
-                    color: #007bff;
-                    cursor: pointer;
-                }
-
-                p:hover {
-                    text-decoration: underline;
-                }
-            `}</style>
         </div>
     );
 };

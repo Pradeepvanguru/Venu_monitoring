@@ -76,7 +76,7 @@ const CreateTask = () => {
         formData.append('assignEmail', JSON.stringify(assignEmail)); // send as array
         formData.append('startDate', startDate);
         formData.append('endDate', endDate);
-        formData.append('moduleSummury)', moduleSummury);
+        formData.append('moduleSummury', moduleSummury);
         if (taskFile) {
             formData.append('taskFile', taskFile);
         }
@@ -102,77 +102,77 @@ const CreateTask = () => {
             <h2>Create Task</h2>
             <form onSubmit={handleSubmit}>
                 <input type="text" placeholder="Task Name" value={taskName} onChange={(e) => setTaskName(e.target.value)} required />
-                <textarea type="text" className='textarea' placeholder="module Summury here.." value={moduleSummury} onChange={(e) => setModuleId(e.target.value)} required 
-                 style={{width:'100%',maxHeight: '150px',overflowY: 'scroll', marginTop:'4px',borderRadius:'0.5rem',border:'none'}} />
+                
+                <label>Start Date</label>
+                <input type="date"  className='w-50' value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+
+                <label>End Date</label>
+                <input type="date" className='w-50' value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+
+                <label>Project Documents</label>
+                <input className='bg-secondary rounded' type="file" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" onChange={handleFileChange} required placeholder={fileName} />
+
 
                 {/* Team member dropdown with checkboxes */}
                 <label>Teammates</label>
                 <div className="team-checkbox-container">
-  {/* Select All */}
-  <div className="form-check mb-2">
-    <input
-      className="form-check-input"
-      type="checkbox"
-      checked={selectAll}
-      onChange={handleSelectAll}
-      id="selectAllCheckbox"
-    />
-    <label className="form-check-label " htmlFor="selectAllCheckbox">
-      Select All
-    </label>
-  </div>
+                {/* Select All */}
+                <div className="form-check mb-2">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                    id="selectAllCheckbox"
+                  />
+                  <label className="form-check-label " htmlFor="selectAllCheckbox">
+                    Select All
+                  </label>
+                </div>
 
-  {/* Table-style layout */}
-  <table className="table table-bordered table-hover bg-secondary rounded table-sm ">
-    <thead>
-      <tr>
-        <th scope="col" className="text-center">Select</th>
-        <th scope="col">Name & Role</th>
-      </tr>
-    </thead>
-    <tbody>
-  {teamMembers.length > 0 ? (
-    teamMembers.map((member, index) => (
-      <tr key={index}>
-        <td className="text-center bg-secondary">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            value={member.email}
-            checked={assignEmail.includes(member.email)}
-            onChange={handleEmailSelect}
-            id={`checkbox-${index}`}
-          />
-        </td>
-        <td className="bg-secondary">
-          <label htmlFor={`checkbox-${index}`} className="bg-secondary">
-            {member.name} ({member.role})
-          </label>
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="2" className="text-center text-muted">
-        No team members found in your Team ID.
-      </td>
-    </tr>
-  )}
-</tbody>
-  </table>
-</div>
-
-
+                {/* Table-style layout */}
+                <table className="table table-bordered border-white table-hover bg-secondary rounded table-sm ">
+                  <thead>
+                    <tr>
+                      <th scope="col" className="text-center">Select</th>
+                      <th scope="col">Name & Role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                {teamMembers.length > 0 ? (
+                  teamMembers.map((member, index) => (
+                    <tr key={index}>
+                      <td className="text-center bg-secondary">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          value={member.email}
+                          checked={assignEmail.includes(member.email)}
+                          onChange={handleEmailSelect}
+                          id={`checkbox-${index}`}
+                        />
+                      </td>
+                      <td className="bg-secondary">
+                        <label htmlFor={`checkbox-${index}`} className="bg-secondary">
+                          {member.name} ({member.role})
+                        </label>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="2" className="text-center text-muted ">
+                      No team members found in your Team ID.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+                </table>
+              </div>
 
 
-                <label>Project Documents</label>
-                <input className='bg-secondary rounded' type="file" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" onChange={handleFileChange} required placeholder={fileName} />
-                
-                <label>Start Date</label>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
-
-                <label>End Date</label>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+                <textarea type="text" className='textarea' placeholder=" Write Task Summury here.. or any overview informations..!" value={moduleSummury} onChange={(e) => setModuleId(e.target.value)} required 
+                 style={{width:'100%',maxHeight: '150px',overflowY: 'scroll', marginTop:'4px',borderRadius:'0.5rem',border:'none'}} />
 
                 <center>
                     <div className="button-group">

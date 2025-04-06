@@ -135,288 +135,350 @@ const ProfilePage = () => {
         setShowPassword(!showPassword);
     };
 
+const capitalizeWords = (str) =>
+  str?.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
     return (
         <div className="profile-container">
-            <button onClick={() => window.history.back()} className="back-button">
-                <FontAwesomeIcon icon={faArrowLeft} /> Back
-            </button>
-           
-            <h2 className="title">Profile</h2>
-            <div className="profile-details">
-                <div className="profile-image-container">
-                    <img src={preview}  alt="Profile" className="profile-image" />
-                    {showUpdateFields && (
-                        <label className="image-upload-label">
-                            <FontAwesomeIcon icon={faCamera} />
-                            <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-                        </label>
-                    )}
-                </div>
-                <p><strong>Team_id:</strong> {user.team_id}</p>
-                <p><strong>Role:</strong> {user.role.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}</p>
-                <p><strong>Name:</strong> {user.name.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}</p>
-                <p><strong>Email:</strong> {user.email}</p>
-               
-             
-            <button className="update-profile" onClick={() => setShowUpdateFields(!showUpdateFields)}>
-                <FontAwesomeIcon icon={faPen} /> 
-            </button>
-            <button className="password-button" onClick={() => setShowPasswordFields(!showPasswordFields)}>
-                <FontAwesomeIcon icon={faLock} />
-            </button>
-            <button className="delete-button" onClick={handleDeleteAccount}>
-                <FontAwesomeIcon icon={faTrash} /> 
+  <button onClick={() => window.history.back()} className="back-button">
+    <FontAwesomeIcon icon={faArrowLeft} /> Back
+  </button>
 
-            </button>
-           
-            </div>
-           
-            {showUpdateFields && (
-                <form className="profile-form" onSubmit={handleSubmit}>
-                     <center><p>Update Here..!</p></center>
-                    <input type="text" value={user.team_id} onChange={(e) => setUser({ ...user, team_id: e.target.value })} />
-                    <input type="text" value={user.name} onChange={(e) => setUser({ ...user, name: e.target.value })} />
-                    <input type="email" value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} /><br></br>
-                   <div className='d-flex  w-100 p-2' style={{flexDirection:'row'}}>
-                   <button type="submit" className="update-button"><FontAwesomeIcon icon={faCheck}  /> Save</button> 
-                   <button type="submit" className="cancel-button"  onClick={() => {setShowUpdateFields(false); }}>❌Cancel</button>
-                   </div>
-                </form>
-            )}
-            
-            {showPasswordFields && (
-                <form className="password-form" onSubmit={handlePasswordChange}>
-                <center><p>Change Password Here..!</p></center>
-                <div className="password-input">
-                <input
-                    type={showPassword ? "text" : "password"}
-                    value={oldPassword}
-                    placeholder="Old Password"
-                    onChange={(e) => setOldPassword(e.target.value)}
-                />
-                <FontAwesomeIcon
-                    icon={showPassword ? faEyeSlash : faEye}
-                    onClick={togglePasswordVisibility}
-                    className="password-toggle-icon"
-                />
-            </div>
+  <h2 className="title">Profile</h2>
 
-            <div className="password-input">
-                <input
-                    type={showPassword ? "text" : "password"}
-                    value={newPassword}
-                    placeholder="New Password"
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                />
-                <FontAwesomeIcon
-                    icon={showPassword ? faEyeSlash : faEye}
-                    onClick={togglePasswordVisibility}
-                    className="password-toggle-icon"
-                />
-               </div>
-                    <div  className='d-flex  w-100 p-2' style={{flexDirection:"row"}}>
-                    <button  type="submit" className="update-button"><FontAwesomeIcon icon={faCheck} />Reset</button>
-                    <button type="submit" className="cancel-button"  onClick={() => {setShowPasswordFields(false); }}>❌Cancel</button>
-                    </div>
-                </form>
-            )}
-          
-            <Tooltip anchorSelect={'.password-button'} place='top'>Reset Password</Tooltip>
-            <Tooltip anchorSelect={'.delete-button'} place='top'>delete my account</Tooltip>
-            <Tooltip anchorSelect={'.update-profile'} place='top'>update my profile</Tooltip>
-            <Tooltip anchorSelect={'.image-upload-label'} place='top'>Upload New Profile Picture</Tooltip>
-            <style>
-                {
-                    `
-                   .profile-container {
-                    max-width: 800px;
-                    margin: auto;
-                    padding: 20px;
-                    border: 1px solid #ddd;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    text-align: center;
-                    background-color: #fff;
-                }
+  <div className="profile-details">
+    <div className="profile-image-container">
+      <img src={preview} alt="Profile" className="profile-image" />
+      {showUpdateFields && (
+        <label className="image-upload-label">
+          <FontAwesomeIcon icon={faCamera} />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
+        </label>
+      )}
+    </div>
 
-                .back-button {
-                    background: none;
-                    border: none;
-                    color: #007bff;
-                    font-size: 16px;
-                    cursor: pointer;
-                    margin-bottom: 10px;
-                    display: flex;
-                    align-items: center;
-                }
+    <p><strong>Team ID:</strong> {user.team_id}</p>
+    <p><strong>Role:</strong> {capitalizeWords(user.role)}</p>
+    <p><strong>Name:</strong> {capitalizeWords(user.name)}</p>
+    <p><strong>Email:</strong> {user.email}</p>
 
-                .back-button svg {
-                    margin-right: 5px;
-                }
+    <button className="update-profile" onClick={() => setShowUpdateFields(!showUpdateFields)}>
+      <FontAwesomeIcon icon={faPen} />
+    </button>
 
-                .title {
-                    font-size: 24px;
-                    margin-bottom: 20px;
-                    color: #333;
-                }
+    <button className="password-button" onClick={() => setShowPasswordFields(!showPasswordFields)}>
+      <FontAwesomeIcon icon={faLock} />
+    </button>
 
-                .profile-image-container {
-                    position: relative;
-                    display: inline-block;
-                    margin-bottom: 20px;
-                    padding: 0px 10px;
-                }
+    <button className="delete-button" onClick={handleDeleteAccount}>
+      <FontAwesomeIcon icon={faTrash} />
+    </button>
+  </div>
 
-                .profile-image {
-                    width: 180px;
-                    height: 180px;
-                    border-radius: 50%;
-                    border: 3px solid #007bff;
-                    object-fit: cover;
-                }
+  {showUpdateFields && (
+    <form className="profile-form" onSubmit={handleSubmit}>
+      <center><p>Update Here..!</p></center>
+      <input
+        type="text"
+        value={user.team_id}
+        onChange={(e) => setUser({ ...user, team_id: e.target.value })}
+      />
+      <input
+        type="text"
+        value={user.name}
+        onChange={(e) => setUser({ ...user, name: e.target.value })}
+      />
+      <input
+        type="email"
+        value={user.email}
+        onChange={(e) => setUser({ ...user, email: e.target.value })}
+      />
+      <div className="d-flex w-100 p-2" style={{ flexDirection: 'row' }}>
+        <button type="submit" className="update-button">
+          <FontAwesomeIcon icon={faCheck} /> Save
+        </button>
+        <button
+          type="button"
+          className="cancel-button"
+          onClick={() => setShowUpdateFields(false)}
+        >
+          ❌ Cancel
+        </button>
+      </div>
+    </form>
+  )}
 
-                .image-upload-label {
-                    position: absolute;
-                    bottom: 0;
-                    margin-right:10px;
-                    right: 10px;
-                    background: #007bff;
-                    color: white;
-                    padding: 8px;
-                    border-radius: 50%;
-                    cursor: pointer;
-                }
+  {showPasswordFields && (
+    <form className="password-form" onSubmit={handlePasswordChange}>
+      <center><p>Change Password Here..!</p></center>
 
-                .profile-details {
-                    text-align: left;
-                    margin-bottom: 20px;
-                    padding: 10px;
-                    background: rgba(163, 159, 159, 0.46);
-                    border-radius: 5px;
-                }
+      <div className="password-input">
+        <input
+          type={showPassword ? 'text' : 'password'}
+          value={oldPassword}
+          placeholder="Old Password"
+          onChange={(e) => setOldPassword(e.target.value)}
+        />
+        <FontAwesomeIcon
+          icon={showPassword ? faEyeSlash : faEye}
+          onClick={togglePasswordVisibility}
+          className="password-toggle-icon"
+        />
+      </div>
 
-                .profile-details p {
-                    margin: 5px 0;
-                    font-size: 14px;
-                    padding: 0px 15px;
-                }
+      <div className="password-input">
+        <input
+          type={showPassword ? 'text' : 'password'}
+          value={newPassword}
+          placeholder="New Password"
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+        <FontAwesomeIcon
+          icon={showPassword ? faEyeSlash : faEye}
+          onClick={togglePasswordVisibility}
+          className="password-toggle-icon"
+        />
+      </div>
 
-                .profile-details strong {
-                    color: #333;
-                    font-size:14px;
-                }
+      <div className="d-flex w-100 p-2" style={{ flexDirection: 'row' }}>
+        <button type="submit" className="update-button">
+          <FontAwesomeIcon icon={faCheck} /> Reset
+        </button>
+        <button
+          type="button"
+          className="cancel-button"
+          onClick={() => setShowPasswordFields(false)}
+        >
+          ❌ Cancel
+        </button>
+      </div>
+    </form>
+  )}
 
-                .update-profile,
-                .password-button,
-                .delete-button {
-                    width: 30%;
-                    padding: 10px;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 14px;
-                    margin-top: 10px;
-                    margin-bottom: 10px;
-                    color: #fff;
-                }
-
-                .update-profile {
-                    margin:10px;
-                    background: #28a745;
-                }
-
-                .password-button {
-                    margin:10px;
-                    background: rgba(120, 146, 4, 0.76);
-                }
-
-                .delete-button {
-                    background-color: rgba(243, 46, 7, 0.56);
-                }
-
-                .delete-button:hover {
-                   background-color: rgba(243, 46, 7, 0.99);
-                }
-
-                .update-profile:hover {
-                    background: rgba(42, 143, 59, 0.51);
-                }
-
-                .profile-form,
-                .password-form {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    width: 60%;
-                    margin: 10px auto;
-                    padding: 20px;
-                    background: rgba(63, 63, 63, 0.19);
-                    border-radius: 0 0 1rem 1rem;
-                    box-shadow: 0 0 5px rgba(176, 181, 186, 0.99);
-                    margin-top:-10px;
-                }
-
-                .profile-form input,
-                .password-form input{
-                    width: 100%;
-                    padding: 10px;
-                    margin-bottom: 10px;
-                    font-weight: bold;
-                    color: #fff;
-                    background-color: rgb(102, 104, 106);
-                    border: 1px solid #ccc;
-                    border-radius: 5px;
-                }
-
-                .update-button,
-                .cancel-button {
-                    width: 30%;
-                    padding:10px 19px 9px 9px;
-                    margin-top:5px;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 13px;
-                    color: #fff;
-                   
-                }
-
-                .update-button {
-                    margin:5px;
-                    margin-left:68px;
-                    background: rgba(38, 141, 55, 0.72);
-                }
-
-                .update-button:hover {
-                    background: rgba(42, 143, 59, 0.51);
-                }
-
-                .cancel-button {
-                    margin:5px;
-                    background: rgba(46, 46, 43, 0.44);
-                }
-
-                .cancel-button:hover {
-                    background: rgba(243, 46, 7, 0.47);
-                }
+  {/* Tooltips */}
+  <Tooltip anchorSelect=".password-button" place="top">Reset Password</Tooltip>
+  <Tooltip anchorSelect=".delete-button" place="top">Delete my account</Tooltip>
+  <Tooltip anchorSelect=".update-profile" place="top">Update my profile</Tooltip>
+  <Tooltip anchorSelect=".image-upload-label" place="top">Upload New Profile Picture</Tooltip>
 
 
-              .password-form .password-toggle-icon {
-                position: relative;
-                right: -90px;
-                cursor: pointer;
-                color: #fff;
-                font-size: 12px;
-                top: -40px;
-              
-                }
+  <style>
+    {
+        `.profile-container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background-color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-                `
-                }
-            </style>
-        </div>
+.back-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.back-button svg {
+  margin-right: 5px;
+}
+
+.title {
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: bold;
+}
+
+.profile-image-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 0px 10px;
+}
+
+.profile-image {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 3px solid #007bff;
+  object-fit: cover;
+}
+
+.image-upload-label {
+  position: absolute;
+  bottom: 0;
+  right: 10px;
+  background: #007bff;
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.image-upload-label:hover {
+  background: #0056b3;
+}
+
+.profile-details {
+  text-align: left;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(163, 159, 159, 0.1);
+  border-radius: 8px;
+}
+
+.profile-details p {
+  margin: 8px 0;
+  font-size: 15px;
+  padding: 0px 15px;
+}
+
+.profile-details strong {
+  color: #333;
+  font-size: 15px;
+}
+
+.update-profile,
+.password-button,
+.delete-button {
+  width: 30%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 10px;
+  color: #fff;
+  transition: all 0.3s ease-in-out;
+}
+
+.update-profile {
+  background: #28a745;
+}
+
+.update-profile:hover {
+  background: #218838;
+}
+
+.password-button {
+  background: rgba(120, 146, 4, 0.76);
+}
+
+.password-button:hover {
+  background: rgba(100, 125, 4, 0.9);
+}
+
+.delete-button {
+  background-color: rgba(243, 46, 7, 0.56);
+}
+
+.delete-button:hover {
+  background-color: rgba(243, 46, 7, 0.9);
+}
+
+.profile-form,
+.password-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60%;
+  margin: 20px auto 10px;
+  padding: 20px;
+  background: rgba(63, 63, 63, 0.1);
+  border-radius: 0 0 1rem 1rem;
+  box-shadow: 0 0 5px rgba(176, 181, 186, 0.99);
+}
+
+.profile-form input,
+.password-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #fff;
+  background-color: rgba(102, 104, 106, 0.64);
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.update-button,
+.cancel-button {
+  width: 45%;
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.update-button {
+  background: rgba(38, 141, 55, 0.72);
+}
+
+.update-button:hover {
+  background: rgba(42, 143, 59, 0.6);
+}
+
+.cancel-button {
+  background: rgba(46, 46, 43, 0.44);
+}
+
+.cancel-button:hover {
+  background: rgba(243, 46, 7, 0.47);
+}
+
+.password-form .password-input {
+  width: 100%;
+  position: relative;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 15px;
+  top: 35%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+}
+
+@media screen and (max-width: 600px) {
+  .profile-form, .password-form {
+    width: 90%;
+  }
+
+  .update-profile,
+  .password-button,
+  .delete-button,
+  .update-button,
+  .cancel-button {
+    width: 100%;
+  }
+}
+`
+    }
+  </style>
+</div>
+
     );
 };
 

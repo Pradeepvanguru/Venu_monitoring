@@ -88,48 +88,46 @@ const TeamLeadAuth = () => {
     };
     return (
         <div className="team-lead-auth">
-            <form onSubmit={handleAuth}>
-             <button onClick={() => window.history.back()} className="back-button">
-                           <FontAwesomeIcon icon={faArrowLeft} /> Back
-                       </button>
-               <center>
-               <h4>{isSignup ? 'Team Lead Signup' : 'Team Lead Login'}</h4>
-               </center>
-                {isSignup && (
-                    <input
-                        type="text"
-                        placeholder="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                )}
+        <form onSubmit={handleAuth}>
+            <button onClick={() => window.history.back()} className="back-button bg-white w-50">
+                <FontAwesomeIcon icon={faArrowLeft} /> Back
+            </button>
+            <center>
+                <h4>{isSignup ? 'Team Lead Signup' : 'Team Lead Login'}</h4>
+            </center>
+            {isSignup && (
                 <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     required
                 />
-                <div className="password-container">
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password must be 6 or more characters"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    {showPassword ? (
-                        <EyeInvisibleOutlined onClick={togglePasswordVisibility} className="eye-icon text-white" />
-                    ) : (
-                        <EyeOutlined onClick={togglePasswordVisibility} className="eye-icon text-white" />
-                    )}
-                    
-                </div>
-                {isSignup && (
-                    <>
+            )}
+            <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+            />
+            <div className="password-container">
+                <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password must be 6 or more characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                {showPassword ? (
+                    <EyeInvisibleOutlined onClick={togglePasswordVisibility} className="eye-icon text-white" />
+                ) : (
+                    <EyeOutlined onClick={togglePasswordVisibility} className="eye-icon text-white" />
+                )}
+            </div>
+            {isSignup && (
+                <>
                     <div className="password-container">
-                    
                         <input
                             type={showConfirmPassword ? "text" : "password"}
                             placeholder="Confirm Password"
@@ -142,26 +140,23 @@ const TeamLeadAuth = () => {
                         ) : (
                             <EyeOutlined onClick={toggleConfirmPasswordVisibility} className="eye-icon text-white" />
                         )}
-                        
                     </div>
-                   
-                    
-                    <label><>Profile Pic:</></label>
-                    <input className='bg-secondary' type="file" accept="image/*" onChange={handleFileChange} placeholder={fileName}  />
-                        
-                    </>
-                )}
-                <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
-                <center><Link to='/forgot'>Forgot Password?</Link></center>
-                <p onClick={switchMode}>
-                    {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
-                </p>
-               
-                
-                
-            </form>
-            
-
+    
+                    <label>Profile Pic:</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        placeholder={fileName}
+                    />
+                </>
+            )}
+            <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
+            <center><p><Link to='/forgot'>Forgot Password?</Link></p></center>
+            <p onClick={switchMode}>
+                {isSignup ? 'Already have an account? Login' : 'Don’t have an account? Sign Up'}
+            </p>
+    
             <style>{`
                 .team-lead-auth {
                     display: flex;
@@ -169,78 +164,106 @@ const TeamLeadAuth = () => {
                     align-items: center;
                     height: 100vh;
                     background-color: #f4f4f4;
-                    padding:20px;
-                    width:100%;
-                    margin:20px;
-                    
+                    padding: 20px;
+                    width: 100%;
+                    margin: 20px;
                 }
-                form {
+    
+                .team-lead-auth form {
                     background-color: white;
-                    padding:30px;
-                    margin:10px;
+                    padding: 30px;
+                    margin: 10px;
                     border-radius: 10px;
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    border-radius: 8px;
                     width: 500px;
                     display: flex;
                     flex-direction: column;
-                    gap:5px;
+                    gap: 5px;
                 }
-
-                
-                .back-button {
-                background: none;
-                border: none;
-                color: #007bff;
-                font-size: 16px;
-                cursor: pointer;
-                margin-bottom: 10px;
-                display: flex;
-                align-items: center;
+    
+                .team-lead-auth .back-button {
+                    background-color: white;
+                    border: none;
+                    color: #007bff;
+                    font-size: 16px;
+                    cursor: pointer;
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
                 }
-
-                .back-button svg {
-                margin-right: 5px;
+    
+                .team-lead-auth .back-button svg {
+                    margin-right: 5px;
                 }
-
-                .password-container {
+    
+                .team-lead-auth .password-container {
                     position: relative;
                     display: flex;
                     align-items: center;
                 }
-                .eye-icon {
+    
+                .team-lead-auth .eye-icon {
                     position: absolute;
                     right: 10px;
                     cursor: pointer;
                     color: #888;
                 }
-                input {
+    
+                .team-lead-auth input {
                     width: 100%;
                     padding: 10px;
                     border: 1px solid #ccc;
                     border-radius: 4px;
-                    font-size: 16px;
-                    background-color: rgb(102, 104, 106);
+                    font-size: 14px;
+                    background-color: rgba(102, 104, 106, 0.5);
+                    color: rgba(12, 12, 12, 0.98);
                 }
-                button {
-                    padding: 12px;
-                    background-color: #007bff;
+    
+                .team-lead-auth button[type="submit"] {
+                    padding: 10px;
+                    background-color:rgba(0, 123, 255, 0.71);
                     border: none;
                     border-radius: 4px;
                     color: white;
                     font-size: 16px;
                     cursor: pointer;
                 }
-                p {
+                 .team-lead-auth button:hover{
+                   background-color:rgba(6, 82, 162, 0.51);
+                 }
+
+                .team-lead-auth p {
                     text-align: center;
-                    color: #007bff;
+                    color:rgba(0, 123, 255, 0.69);
                     cursor: pointer;
+                    font-size:12px;
                 }
-                p:hover {
+    
+                .team-lead-auth p:hover {
                     text-decoration: underline;
                 }
+    
+                .team-lead-auth label {
+                    font-weight: 200;
+                    margin-top: 5px;
+                    font-size:14px;
+                }
+    
+                .team-lead-auth input[type="file"] {
+                    border: none;
+                    padding: 10px;
+                    background-color: rgba(102, 104, 106, 0.48);
+                    color: white;
+                    border-radius: 4px;
+                }
+    
+                .team-lead-auth h4 {
+                    margin-bottom: 10px;
+                }
             `}</style>
-        </div>
+        </form>
+    </div>
+    
     );
 };
 
