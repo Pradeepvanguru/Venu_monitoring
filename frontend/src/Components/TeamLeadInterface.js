@@ -94,7 +94,6 @@ const TeamLeadInterface = () => {
     }, []);
 
 
-
     return (
         <div className="team-lead-interface">
             <Sidebar />

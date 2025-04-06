@@ -121,7 +121,7 @@ const EmployeeDashboard = () => {
                                             </div>
                                             <div className="task-progress">
                                                 <p><b>Task Progress:</b></p>
-                                                <BootstrapProgressBar now={progress} label={`${Math.round(progress)}%`} />
+                                                <BootstrapProgressBar now={progress || "0%"} label={`${Math.round(progress)}%`} />
                                             </div>
                                             <div className='delete'>
                                                 <button  

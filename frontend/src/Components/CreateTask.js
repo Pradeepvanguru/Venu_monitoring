@@ -1,132 +1,185 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateTask.css';
 import axios from 'axios';
-import EmployeeSidebar from './EmployeeSidebar';
 import Sidebar from './Sidebar';
-import {notification} from 'antd';
-
+import { notification } from 'antd';
 
 const CreateTask = () => {
-    const [teamLead, setTeamLead] = useState('');
     const [taskName, setTaskName] = useState('');
-    const [assignEmail, setAssignEmail] = useState('');
+    const [assignEmail, setAssignEmail] = useState([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [taskFile, setTaskFile] = useState(null);
-    const [moduleId, setModuleId] = useState('');
-    const [fileName,setfileName]=useState('')
+    const [moduleSummury, setModuleId] = useState('');
+    const [fileName, setFileName] = useState('');
+    const [teamMembers, setTeamMembers] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
+
     const navigate = useNavigate();
 
+    const token = localStorage.getItem('userToken');
+
+    useEffect(() => {
+        const teamId = localStorage.getItem('team_id');
+        
+        if (teamId) {
+          const fetchTeamMembers = async () => {
+            try {
+              const response = await axios.get(`${process.env.REACT_APP_URL}/api/team-members/${teamId}`,{
+                headers: {Authorization:`Bearer ${token}`}
+              });
+              setTeamMembers(response.data); // assuming response.data is an array of teammates
+            } catch (error) {
+              console.error('Error fetching team members:', error);
+            }
+          };
+    
+          fetchTeamMembers();
+        }
+      }, []);
 
     const handleFileChange = (e) => {
-       const file=(e.target.files[0]);
-       if(file){
-        setfileName(file.name)
-        setTaskFile(file)
-       }
+        const file = e.target.files[0];
+        if (file) {
+            setFileName(file.name);
+            setTaskFile(file);
+        }
     };
 
-    
+    const handleEmailSelect = (e) => {
+        const { value, checked } = e.target;
+        if (checked) {
+            setAssignEmail(prev => [...prev, value]);
+        } else {
+            setAssignEmail(prev => prev.filter(email => email !== value));
+            setSelectAll(false); // uncheck selectAll if one is unchecked
+        }
+    };
+
+    const handleSelectAll = (e) => {
+        const { checked } = e.target;
+        setSelectAll(checked);
+        if (checked) {
+            const allEmails = teamMembers.map(member => member.email);
+            setAssignEmail(allEmails);
+        } else {
+            setAssignEmail([]);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         const formData = new FormData();
         formData.append('taskName', taskName);
-        formData.append('assignEmail', assignEmail);
+        formData.append('assignEmail', JSON.stringify(assignEmail)); // send as array
         formData.append('startDate', startDate);
         formData.append('endDate', endDate);
-        formData.append('moduleId', moduleId);
+        formData.append('moduleSummury)', moduleSummury);
         if (taskFile) {
             formData.append('taskFile', taskFile);
         }
-    
+
         try {
-            const token = localStorage.getItem('userToken'); // Ensure token exists
-            console.log('Sending token:', token); // Debugging log
-    
-            const response = await axios.post('http://localhost:5000/api/tasks', formData, {
+           
+            const response = await axios.post(`${process.env.REACT_APP_URL}/api/tasks`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            notification.success({message:"Task created successfully"});
-            // console.log('Response:', response);
-            navigate("/Team-lead-interface")
-           
+            notification.success({ message: "Task created and sent successfully!" });
+            navigate(-1);
         } catch (error) {
             console.error('Error creating task:', error.response ? error.response.data : error.message);
         }
     };
-    
-    
 
     return (
         <div className="create-task-container">
-        <div>
-            <Sidebar />
-        </div>
+            <div><Sidebar /></div>
             <h2>Create Task</h2>
             <form onSubmit={handleSubmit}>
-                
-                <input
-                    type="text"
-                    placeholder="Employee Task Name"
-                    value={taskName}
-                    onChange={(e) => setTaskName(e.target.value)}
-                    required
-                />
+                <input type="text" placeholder="Task Name" value={taskName} onChange={(e) => setTaskName(e.target.value)} required />
+                <textarea type="text" className='textarea' placeholder="module Summury here.." value={moduleSummury} onChange={(e) => setModuleId(e.target.value)} required 
+                 style={{width:'100%',maxHeight: '150px',overflowY: 'scroll', marginTop:'4px',borderRadius:'0.5rem',border:'none'}} />
 
-               
-                <input
-                    type="email"
-                    placeholder="Assignd Email"
-                    value={assignEmail}
-                    onChange={(e) => setAssignEmail(e.target.value)}
-                    required
-                />
+                {/* Team member dropdown with checkboxes */}
+                <label>Teammates</label>
+                <div className="team-checkbox-container">
+  {/* Select All */}
+  <div className="form-check mb-2">
+    <input
+      className="form-check-input"
+      type="checkbox"
+      checked={selectAll}
+      onChange={handleSelectAll}
+      id="selectAllCheckbox"
+    />
+    <label className="form-check-label " htmlFor="selectAllCheckbox">
+      Select All
+    </label>
+  </div>
 
-                <input
-                    type="text"
-                    placeholder="Module ID"
-                    value={moduleId}
-                    onChange={(e) => setModuleId(e.target.value)}
-                    required
-                />
+  {/* Table-style layout */}
+  <table className="table table-bordered table-hover bg-secondary rounded table-sm ">
+    <thead>
+      <tr>
+        <th scope="col" className="text-center">Select</th>
+        <th scope="col">Name & Role</th>
+      </tr>
+    </thead>
+    <tbody>
+  {teamMembers.length > 0 ? (
+    teamMembers.map((member, index) => (
+      <tr key={index}>
+        <td className="text-center bg-secondary">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            value={member.email}
+            checked={assignEmail.includes(member.email)}
+            onChange={handleEmailSelect}
+            id={`checkbox-${index}`}
+          />
+        </td>
+        <td className="bg-secondary">
+          <label htmlFor={`checkbox-${index}`} className="bg-secondary">
+            {member.name} ({member.role})
+          </label>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="2" className="text-center text-muted">
+        No team members found in your Team ID.
+      </td>
+    </tr>
+  )}
+</tbody>
+  </table>
+</div>
+
+
+
 
                 <label>Project Documents</label>
-                <input  className='bg-secondary rounded'
-                    type="file"
-                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                    onChange={handleFileChange}
-                    placeholder={fileName}
-                    required
-                />
-                {/* {fileName && <p>Selected file: {fileName}</p>} */}
-
+                <input className='bg-secondary rounded' type="file" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" onChange={handleFileChange} required placeholder={fileName} />
+                
                 <label>Start Date</label>
-                <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                />
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
 
                 <label>End Date</label>
-                <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
-                />
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
 
-               <center>
-               <div className="button-group  ">
-                    <button type="button" className="back-btn m-4 bg-warning px-3" onClick={() => navigate(-1)}>cancil</button>
-                    <button type="submit" className="submit-btn px-2 mt-4 my-4">Create Task</button>
-                </div>
-               </center>
+                <center>
+                    <div className="button-group">
+                        <button type="button" className="back-btn m-4 bg-warning px-3" onClick={() => navigate(-1)}>Cancel</button>
+                        <button type="submit" className="submit-btn px-2 mt-4 my-4">Create Task</button>
+                    </div>
+                </center>
             </form>
         </div>
     );

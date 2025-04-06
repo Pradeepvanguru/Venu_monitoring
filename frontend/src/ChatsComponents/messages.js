@@ -134,12 +134,16 @@ const Messages = ({ messages, setMessages }) => {
                       overflow: 'hidden',
                       borderRadius: '20px',
                       padding: '10px 15px',
-                      width: '100%',
                       fontSize: '14px',
                       maxHeight: '150px',
                       border: '1px solid #ccc',
                       outline: 'none',
-                      backgroundColor: '#f0f0f0'
+                      backgroundColor: '#f0f0f0',
+                      overflowY: 'scroll',
+                      height:'250px',
+                      width:"300px"
+                    
+                  
                     }}
                     className="edit-textarea"
                     rows={1}
@@ -151,7 +155,7 @@ const Messages = ({ messages, setMessages }) => {
                       }))
                     }
                     onInput={(e) => {
-                      e.target.style.height = 'auto';
+                      e.target.style.height = '150px';
                       e.target.style.height = `${e.target.scrollHeight}px`;
                     }}
                     placeholder="Edit your message..."
@@ -261,6 +265,10 @@ const Messages = ({ messages, setMessages }) => {
                     }
                     .messages {
                         -ms-overflow-style: none;
+                        scrollbar-width: none;
+                    }
+                    .edit-textarea{
+                     -ms-overflow-style: none;
                         scrollbar-width: none;
                     }
 

@@ -16,6 +16,10 @@ const authMiddleware = require('../middleware/authMiddleware'); // Ensure you ha
 const router = express.Router();
 
 
+const generateAccessKey = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 // Ensure the uploads folder exists
 const uploadDirectory = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDirectory)) {
@@ -44,7 +48,7 @@ const transporter = nodemailer.createTransport({
 });
 
 
-//fetch the task based on the team-lead T_id
+//fetch the task based on the team-lead
 router.get("/tasks", authMiddleware, async (req, res) => {
   try {
       // Only allow team leads
@@ -100,41 +104,68 @@ const sendTaskEmail = async ({ taskName, assignEmail, startDate, endDate, taskFi
     }
 };
 
+router.get('/team-members/:teamId',authMiddleware, async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    const teamMembers = await User.find({ team_id: teamId, _id:{$ne:req.user.id} }); // assuming you stored team_id in Register schema
+    res.status(200).json(teamMembers);
+  } catch (err) {
+    console.error('Error fetching team members:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 router.post('/tasks', authMiddleware, upload.single('taskFile'), async (req, res) => {
-  const {assignEmail, taskName, startDate, endDate, moduleId } = req.body;
+  const { assignEmail, taskName, startDate, endDate,  moduleSummury } = req.body;
   const taskFile = req.file ? req.file.path : null;
+ 
 
   try {
-     
-
-      // Find the logged-in user in the database
-      const user = await User.findById(req.user.id);  // Fix: Use findById
+      // Find the logged-in user
+      const user = await User.findById(req.user.id);
 
       if (!user) {
           return res.status(404).json({ error: 'User not found' });
       }
 
-      // console.log("User found:", user);
-
-      // Get T_id from the user
       const team_id = user.team_id;
-      // console.log("User T_id:", team_id);
 
-      // Check for missing taskFile
       if (!taskFile) {
           return res.status(400).json({ error: 'Task file is required' });
       }
 
-      // Create a new task with T_id
-      const newTask = new Task({ taskName, startDate, endDate, taskFile, team_id, moduleId,assignEmail });
-      await newTask.save();
+      // Parse the assignEmail string (which should be a JSON array)
+      const parsedEmails = JSON.parse(assignEmail);
 
-      res.status(201).json({ message: 'Task created successfully', task: newTask });
+      if (!Array.isArray(parsedEmails) || parsedEmails.length === 0) {
+          return res.status(400).json({ error: 'assignEmail must be a non-empty array' });
+      }
+
+      // Create task for each email
+      const tasks = await Promise.all(parsedEmails.map(async (email) => {
+        const ModuleId=generateAccessKey()
+          const newTask = new Task({
+              taskName,
+              startDate,
+              endDate,
+              taskFile,
+              team_id,
+              moduleSummury,
+              moduleId:ModuleId,
+              assignEmail: email
+          });
+          return await newTask.save();
+      }));
+
+      res.status(201).json({ message: 'Tasks created successfully', tasks });
+
   } catch (err) {
-      console.error("Error creating task:", err);
-      res.status(500).json({ error: 'Error creating task', details: err.message });
+      console.error("Error creating tasks:", err);
+      res.status(500).json({ error: 'Error creating tasks', details: err.message });
   }
 });
+
 
 // Get logged-in user's details
 router.get('/logged-user',authMiddleware, async (req, res) => {

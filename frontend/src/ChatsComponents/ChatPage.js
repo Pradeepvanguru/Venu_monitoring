@@ -391,18 +391,23 @@ const ChatPage = () => {
             }
 
             .textarea-message {
-                height: 45px;
-                overflow: hidden;
+                overflow: scroll;
                 resize: none;
-                width: 40%;
-                padding: 10px 14ypx;
-                border-radius: 2rem;
+                height:40px;
+                width: 45%;
+                padding: 10px 20px;
+                border-radius: 1.5rem;
                 border: 1px solid #ccc;
                 font-size: 14px;
                 background-color:rgba(2, 8, 32, 0.85);
                 color: #fff;
                 outline: none;
+                max-Height:150px;
+               z-index:10001;
             }
+             .textarea-message::-webkit-scrollbar {
+                        display: none;
+                    }
 
             .file-upload-icon {
                 cursor: pointer;
