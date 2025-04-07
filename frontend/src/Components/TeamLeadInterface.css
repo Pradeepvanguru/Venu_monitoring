@@ -1,21 +1,17 @@
-/* General reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-}
+
 
 /* Team Lead Interface container */
 .team-lead-interface {
     display: flex;
     background-color: #ffffff;
-    min-height: 100vh;
     padding: 10px;
     color: #ffffff;
     width: 100%;
-    
+    height: 530px;
+    overflow-y: auto;
+    position: relative;
 }
+
 
 /* Content wrapper for tasks */
 .content-wrapper {
@@ -26,6 +22,8 @@
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     position: relative;
+    height: 530px;
+    overflow-y: auto;
 }
 
 /* Refresh button */
@@ -58,7 +56,7 @@
 
 /* Task List Container */
 .todo-list {
-    background-color: #2a2e35;
+    
     padding: 20px;
     width: 100%;
     border-radius: 12px;
