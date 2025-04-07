@@ -92,13 +92,20 @@ const TeamLeadInterface = () => {
     useEffect(() => {
         fetchTasks();
     }, []);
-
+   
+    const handleRefresh = () => {
+        fetchTasks();
+    };
 
     return (
         <div className="team-lead-interface">
             <Sidebar />
             <div className="content-wrapper">
-                <h2 className="module-heading">Tasks</h2>
+            <button onClick={handleRefresh} className="btn btn-success refresh-btn">
+                    Refresh 🔃
+                </button>
+                <h2 className="module-heading">Task Modules</h2>
+               
                 {error && <div className="alert alert-danger">{error}</div>}
                 <div className="todo-list">
                     {tasks.length > 0 ? (

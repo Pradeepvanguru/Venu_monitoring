@@ -25,6 +25,7 @@ const ChatPage = () => {
     const textareaRef = useRef(null);
     const [files,setFile]=useState(null)
     const [fileName,setfileName]=useState(null)
+    const [searchQuery, setSearchQuery] = useState("");
     // const intervalRef = useRef(null);
     // const timeoutRef = useRef(null);
 
@@ -38,7 +39,7 @@ const ChatPage = () => {
     };
 
 
-        useEffect(() => {
+    useEffect(() => {
             const fetchUsers = async () => {
                 try {
                     const token = localStorage.getItem('userToken');
@@ -65,7 +66,7 @@ const ChatPage = () => {
             };
 
             fetchUsers();
-        }, []);
+     }, []);
 
 
     useEffect(() => {
@@ -195,7 +196,10 @@ const ChatPage = () => {
     };
 
    
-   
+   // Filter users inline during rendering
+const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
     
 
     return (
@@ -217,11 +221,16 @@ const ChatPage = () => {
                     
                 }}> &lt; Back</button>
                 
-        <div className="user-list">
-        <ToastContainer position="top-right" autoClose={3000} />
-            <div style={{ position: "relative", width: "250px",  }}>
-                <input type="search" placeholder="Search here..."
-                    style={{
+                <div className="user-list">
+  <ToastContainer position="top-right" autoClose={3000} />
+  
+  <div style={{ position: "relative", width: "250px" }}>
+    <input
+      type="search"
+      placeholder="Search here..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      style={{
                     width: "auto",
                     padding: "10px 40px 10px 25px",
                     fontSize: "16px",
@@ -231,33 +240,39 @@ const ChatPage = () => {
                     display:'flex',
                     transition: "0.3s ease-in-out",
                     }}
-                />
-                <i
-                    className="fa fa-search"
-                    style={{
-                    position: "absolute",
-                    right: "-1px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    fontSize: "20px",
-                    color: "#666fff   ",
-                    cursor: "pointer",
-                    transition: "0.3s ease-in-out",
-                    }}
-                ></i>
-                </div>
-  
-              {users.length> 0 ?(
-                users.map((user) => (
-                    <div key={user._id} className="user-item" onClick={() => setSelectedUser(user)}>
-                        <FaUser className="user-icon" /> {user.name} ({user.role}) 
-                    </div>
-                ))
+    />
+    <i
+      className="fa fa-search"
+      style={{
+        position: "absolute",
+        right: "4px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        fontSize: "20px",
+        color: "#666fff",
+        cursor: "pointer",
+        transition: "0.3s ease-in-out",
+      }}
+    ></i>
+  </div>
 
-              ):(
-                <center className='text-secondary m-5 shadow-sm '><i>No Teammates are found...!</i></center>
-              )}
-            </div>
+  {filteredUsers.length > 0 ? (
+    filteredUsers.map((user) => (
+      <div
+        key={user._id}
+        className="user-item"
+        onClick={() => setSelectedUser(user)}
+      >
+        <FaUser className="user-icon" /> {user.name} ({user.role})
+      </div>
+    ))
+  ) : (
+    <center className="text-secondary m-5 shadow-sm">
+      <i>No Teammates are found...!</i>
+    </center>
+  )}
+</div>
+
             <div className="chat-box"> 
              <div className="chat-header p-3 bg-black m-1 rounded text-white  ">
             <FaUser className="user-icon mx-2" />{selectedUser ? ` ${userName}` : "No user"}

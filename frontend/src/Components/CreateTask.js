@@ -97,17 +97,18 @@ const CreateTask = () => {
     };
 
     return (
-        <div className="create-task-container">
+        <div  className="create-task-container bg-body-tertiary">
+          <div className='border-1 bg-dark px-3 py-4 rounded' style={{boxShadow: '0 8px 14px rgba(143, 140, 140, 0.33)'}}>
             <div><Sidebar /></div>
-            <h2>Create Task</h2>
+            <h2>Create Task Module</h2>
             <form onSubmit={handleSubmit}>
-                <input type="text" placeholder="Task Name" value={taskName} onChange={(e) => setTaskName(e.target.value)} required />
+                <input type="text" placeholder="Task Module Name " value={taskName} onChange={(e) => setTaskName(e.target.value)} required />
                 
                 <label>Start Date</label>
-                <input type="date"  className='w-50' value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+                <input type="date"  className='w-100' value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
 
                 <label>End Date</label>
-                <input type="date" className='w-50' value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+                <input type="date" className='w-100' value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
 
                 <label>Project Documents</label>
                 <input className='bg-secondary rounded' type="file" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" onChange={handleFileChange} required placeholder={fileName} />
@@ -115,7 +116,7 @@ const CreateTask = () => {
 
                 {/* Team member dropdown with checkboxes */}
                 <label>Teammates</label>
-                <div className="team-checkbox-container">
+                <div className="team-checkbox-container ">
                 {/* Select All */}
                 <div className="form-check mb-2">
                   <input
@@ -134,8 +135,8 @@ const CreateTask = () => {
                 <table className="table table-bordered border-white table-hover bg-secondary rounded table-sm ">
                   <thead>
                     <tr>
-                      <th scope="col" className="text-center">Select</th>
-                      <th scope="col">Name & Role</th>
+                      <th scope="col" className="text-center"><p>Select</p></th>
+                      <th scope="col"><p> informations</p></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -154,7 +155,9 @@ const CreateTask = () => {
                       </td>
                       <td className="bg-secondary">
                         <label htmlFor={`checkbox-${index}`} className="bg-secondary">
-                          {member.name} ({member.role})
+                        {member.name} -
+                         ({member.role === "employee" ? "Teammate" : member.role})
+                        
                         </label>
                       </td>
                     </tr>
@@ -171,7 +174,7 @@ const CreateTask = () => {
               </div>
 
 
-                <textarea type="text" className='textarea' placeholder=" Write Task Summury here.. or any overview informations..!" value={moduleSummury} onChange={(e) => setModuleId(e.target.value)} required 
+                <textarea type="text" className='textarea' placeholder="Tag Any information   or message to your temmates.." value={moduleSummury} onChange={(e) => setModuleId(e.target.value)}  
                  style={{width:'100%',maxHeight: '150px',overflowY: 'scroll', marginTop:'4px',borderRadius:'0.5rem',border:'none'}} />
 
                 <center>
@@ -181,6 +184,7 @@ const CreateTask = () => {
                     </div>
                 </center>
             </form>
+        </div>
         </div>
     );
 };

@@ -14,7 +14,7 @@ const EmployeeSidebar = () => {
 
     const handlerefresh = () => {
         navigate('/employee-dashboard');
-        window.location.reload();
+        // window.location.reload();
     };
 
     return (

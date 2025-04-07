@@ -5,6 +5,9 @@ import { Button, notification } from 'antd';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import EmployeeDashboard from '../Components/EmployeeDashboard';
+import EmployeeSidebar from '../Components/EmployeeSidebar';
+import Sidebar from '../Components/Sidebar';
 
 
 
@@ -138,8 +141,11 @@ const ProfilePage = () => {
 const capitalizeWords = (str) =>
   str?.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
+const role=localStorage.getItem("userRole")
+
     return (
         <div className="profile-container">
+        {role==='employee' ? <EmployeeSidebar />: <Sidebar />}
   <button onClick={() => window.history.back()} className="back-button">
     <FontAwesomeIcon icon={faArrowLeft} /> Back
   </button>
@@ -180,6 +186,8 @@ const capitalizeWords = (str) =>
     </button>
   </div>
 
+ <div className='d-flex mx-4 col-sm-11' style={{flexDirection:'row',gap:"12px",marginTop:'-26px'}}>
+        
   {showUpdateFields && (
     <form className="profile-form" onSubmit={handleSubmit}>
       <center><p>Update Here..!</p></center>
@@ -260,6 +268,7 @@ const capitalizeWords = (str) =>
       </div>
     </form>
   )}
+    </div>
 
   {/* Tooltips */}
   <Tooltip anchorSelect=".password-button" place="top">Reset Password</Tooltip>
@@ -271,9 +280,9 @@ const capitalizeWords = (str) =>
   <style>
     {
         `.profile-container {
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
+  max-width: 75%;
+  margin-left:280px ;
+  padding:20px;
   border: 1px solid #ddd;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -283,9 +292,11 @@ const capitalizeWords = (str) =>
   height: 100vh;
   overflow-y: auto;
   position: relative;
+  
 }
 
-
+.profile-container::-webkit-scrollbar{
+display:none;}
 
 .back-button {
   background: none;

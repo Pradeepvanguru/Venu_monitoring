@@ -68,9 +68,9 @@ const EmployeeDashboard = () => {
         }
     };
 
-    // const handleRefresh = () => {
-    //     fetchTasks();
-    // };
+    const handleRefresh = () => {
+        fetchTasks();
+    };
     const handleDelete = async (taskId) => {
         try {
             // Make sure taskId is passed correctly in the URL
@@ -94,9 +94,9 @@ const EmployeeDashboard = () => {
         <div className="team-lead-interface">
             <EmployeeSidebar />
             <div className="content-wrapper">
-                {/* <button onClick={handleRefresh} className="btn btn-success refresh-btn">
-                    Refresh 
-                </button> */}
+                <button onClick={handleRefresh} className="btn btn-success refresh-btn">
+                    Refresh 🔃
+                </button>
                 <h2 className="module-heading">Tasks</h2>
 
                 {error && <div className="alert alert-danger">{error}</div>}
@@ -110,9 +110,9 @@ const EmployeeDashboard = () => {
                                 const formattedEndDate = format(new Date(task.endDate), 'dd MMM yyyy');
 
                                 return (
-                                    <li key={task._id} className="list-group-item task-item">
+                                    <li key={task._id} className="list-group-item task-item"  onClick={() => handleTaskClick(task.moduleId)} style={{cursor:"pointer"}} >
                                         <div className="task-card">
-                                            <div className="task-details">
+                                            <div className="task-details" >
                                                 <h3 className="task-name">{task.taskName}</h3>
                                                 <p className="task-module-id"><strong>Module ID:</strong> {task.moduleId}</p>
                                                 <p className="task-date"><strong>Your Email:</strong> {task.assignEmail}</p>
