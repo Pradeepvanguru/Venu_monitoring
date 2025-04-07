@@ -172,10 +172,13 @@ const EmployeeAuth = () => {
         display: flex;
         justify-content: center;
         align-items: center;
-        height: auto;
         background-color: #f4f4f4;
         padding: 20px;
         width: 100%;
+        height: 100vh;
+        overflow-y: auto;
+        position: relative;
+        margin-top:5px;
     }
 
     .employee-auth__form {

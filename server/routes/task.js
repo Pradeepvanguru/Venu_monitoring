@@ -104,17 +104,7 @@ const sendTaskEmail = async ({ taskName, assignEmail, startDate, endDate, taskFi
     }
 };
 
-router.get('/team-members/:teamId',authMiddleware, async (req, res) => {
-  try {
-    const { teamId } = req.params;
 
-    const teamMembers = await User.find({ team_id: teamId, _id:{$ne:req.user.id} }); // assuming you stored team_id in Register schema
-    res.status(200).json(teamMembers);
-  } catch (err) {
-    console.error('Error fetching team members:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 router.post('/tasks', authMiddleware, upload.single('taskFile'), async (req, res) => {
   const { assignEmail, taskName, startDate, endDate,  moduleSummury } = req.body;
@@ -471,6 +461,73 @@ router.delete('/tasks/:taskId', async (req, res) => {
   }
 });
 
+
+
+
+//file end points---------------------------------------------------------------------------------------
+
+
+// ✅ Route to get team members by team ID (excluding current user)
+router.get('/team-members/:teamId', authMiddleware, async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    const teamMembers = await User.find({
+      team_id: teamId,
+      _id: { $ne: req.user.id }
+    });
+
+    res.status(200).json(teamMembers);
+  } catch (err) {
+    console.error('Error fetching team members:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ✅ Route to fetch data based on user role
+router.get('/datafetch/:email', authMiddleware, async (req, res) => {
+  const loggedInUser = req.user;
+  const { role, email: userEmail } = loggedInUser;
+  const { email } = req.params;
+
+  try {
+    let files = [];
+
+    if (role === 'team-lead') {
+      const teamLead = await User.findOne({ email });
+
+      if (!teamLead) {
+        return res.status(404).json({ message: 'Team not found for this team lead' });
+      }
+
+      const teammates = await User.find({
+        team_id: teamLead.team_id,
+        _id: { $ne: loggedInUser.id }
+      });
+
+      const teammateEmails = teammates.map(member => member.email);
+
+      files = await Data.find({ assignEmail: { $in: teammateEmails } });
+    } else if (role === 'employee') {
+      files = await Data.find({ assignEmail: userEmail });
+    } else {
+      return res.status(403).json({ message: 'Invalid role or not authorized' });
+    }
+
+    if (!files || files.length === 0) {
+      return res.status(404).json({ message: 'No data found here' });
+    }
+
+    res.status(200).json({ success: true, files });
+  } catch (error) {
+    console.error('Error fetching data by role:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+module.exports = router;
+
+
 router.get('/files/:moduleId', async (req, res) => {
   try {
     const { moduleId } = req.params;
@@ -555,6 +612,9 @@ router.get('/download-file/:moduleId/:dayIndex', async (req, res) => {
     return res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 });
+
+
+
 
 
 

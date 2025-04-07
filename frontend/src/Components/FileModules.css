@@ -1,250 +1,138 @@
-/* General reset and global styling */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: auto; /* Ensure the page is scrollable */
-    font-family: 'Arial', sans-serif; /* Consistent font for the page */
-    background-color: #f4f4f4; /* Light background for better visibility */
-    color: #333; /* Default text color */
-    box-sizing: border-box;
+.team-lead-interfaces {
+  padding: 20px;
+  color: #ffffff;
+  border-radius: 12px;
+  width: 75%;
+  margin: 10px 290px;
+  height: 100vh;
+  overflow-y: scroll;
+}
+.team-lead-interfaces::-webkit-scrollbar {
+  display: none;
 }
 
-/* Wrapper for the entire interface */
-.team-lead-interface {
-    display: flex;
-    min-height: 100vh; /* Full height of viewport */
-    overflow-y: auto; /* Allow scrolling for overflowing content */
-    background-color: #f4f4f4;
+.team-lead-interfaces h4,
+.team-lead-interfaces h2 {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #00bcd4;
 }
 
-/* Sidebar styling */
-.sidebar {
-    flex: 0 0 250px; /* Fixed width for sidebar */
-    height: 100vh; /* Full height of viewport */
-    overflow-y: auto; /* Sidebar scrolls independently if content overflows */
-    background-color: #34495e; /* Deep blue for sidebar */
-    color: #fff;
-    padding: 15px;
-    position: fixed; /* Sidebar remains fixed */
-    top: 0;
-    left: 0;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+.team-lead-interfaces .table {
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-/* Main content styling */
-.main-content {
-    margin-left: 260px; /* Leave space for the fixed sidebar */
-    padding: 20px;
-    flex: 1;
-    min-height: 100%; /* Ensures full height */
-    background-color: #ffffff; /* Clean white background */
-    border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-    overflow-y: auto; /* Scroll if content exceeds */
-    transition: all 0.3s ease;
+.team-lead-interfaces .table th,
+.team-lead-interfaces .table td {
+  vertical-align: middle;
+  color: #ffffff;
 }
 
-/* Main headings */
-.main-content h1 {
-    color: #333; /* Darker text for headings */
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    font-weight: 500;
-    text-transform: capitalize;
+.team-lead-interfaces .table-hover tbody tr:hover {
+  background-color: #2a2a2a;
 }
 
-.main-content p {
-    font-size: 1.1rem;
-    color: #555; /* Softer gray for text */
-    margin-bottom: 20px;
+.team-lead-interfaces .btn {
+  border-radius: 8px;
 }
 
-/* Search button styling */
-.btn.search-btn {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.btn.search-btn:hover {
-    background-color: #92b300;
-    transform: scale(1.05);
-}
-
-/* Form styling */
-.search-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    max-width: 400px;
-    margin-top: 20px;
-}
-
-.module-input {
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.module-input:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
-}
-
-/* Error message styling */
-.alert.error-message {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-
-/* File list container */
-.files-list {
-    margin-top: 30px;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px 30px;
-    box-shadow: 0 0 5px rgba(0, 221, 255, 0.25);
-    max-height: calc(100vh - 300px); /* Dynamically adjust height */
-    overflow-y: auto; /* Enable scrolling if content exceeds */
-}
-
-/* File list styling */
-.file-list {
-    list-style-type: none;
-    padding: 0;
-}
-
-.file-item {
-    width: 100%;
-    padding: 5px ;
-    margin-bottom: 15px;
-    background-color: #8a8686;
-    border: none;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 6px 0 15px rgba(234, 255, 0, 0.25);
-    transition: box-shadow 0.3s ease, background-color 0.3s ease;
-}
-
-.file-item:hover {
-    background-color: #93a385;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Style for the day text */
-.file-item strong {
-    color: #000; /* Ensure the "day" text is black */
-    font-weight: bold;
-    font-size: 1.1rem; /* Slightly larger for emphasis */
-}
-
-/* File download link/button styling */
-.file-link, .btn-link {
-    color: #124b17;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s ease, text-decoration 0.3s ease;
-}
-
-.file-link:hover, .btn-link:hover {
-    color: #b34200;
-    text-decoration: underline;
-}
-
-
-.preview-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+.team-lead-interfaces .files-list {
+  margin-top: 30px;
+  overflow-y: auto;
+  margin: 10px;
+ 
   
-  .preview-modal {
-    background: rgb(177, 176, 176);
-    padding: 20px;
-    border-radius: 10px;
-    position: relative;
-  }
-  
-  .preview-modal iframe {
-    width: 900px;
-    height: 500px;
-    border: 1px solid #ddd;
-  }
-  
-  .preview-modal button {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    padding: 9px 10px;
-    background-color: #fb0505;
-    border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: 0.8rem;
-  }
-  
+}
+.team-lead-interfaces .files-list .row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  max-height: 350px; /* ~2 rows */
+  overflow-y: scroll;
+  padding: 10px 15px;
+  border: 1px solid #1e1e1e;
 
-  /* FileModules.css */
-.file-item button {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  button i {
-    font-size: 18px;
-  }
-  
-  .file-list .file-item {
-    margin-bottom: 10px;
-  }
-  
-  .button-group {
-    display: flex;
-    gap: 10px;
-  }
-  
+}
 
-  .file-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 items per row */
-    gap: 2px;
-  }
+.team-lead-interfaces .custom-col {
+  flex: 0 0 20%; /* 5 items per row */
+  max-width: 20%;
+  padding: 18px;
+  box-sizing: border-box;
+ 
+}
+
+.team-lead-interfaces .card {
+  height: 100%;
+}
+
+
+.team-lead-interfaces .files-list h5 {
+  font-weight: 500;
+  color: #00acc1;
+}
+
+.team-lead-interfaces .card {
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.team-lead-interfaces .card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(241, 244, 245, 0.866);
+}
+
+.team-lead-interfaces .card-title {
+  color: #ffeb3b;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.team-lead-interfaces .btn-outline-primary,
+.team-lead-interfaces .btn-outline-info {
+  border-radius: 6px;
+}
+
+
+
+.team-lead-interfaces .preview-overlay {
+  border-radius: 10px;
+  z-index: 1000;
+  background-color: rgba(9, 8, 8, 0.841);
+  animation: zoomIn 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  inset: 0;
+  padding: 20px;
+  margin: 1px 1px 1px 0px;
+  width: 100vw;
+}
+
+.team-lead-interfaces .preview-overlay iframe {
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+  border-radius:1rem ;
   
-  .file-item {
-    border: 1px solid #ddd;
-    padding: 20px -20px ;
-    text-align: center;
-    background-color: #5d5959;
-    border-radius: 8px;
+}
+
+/* Zoom animation */
+@keyframes zoomIn {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
   }
-  
-  .button-group button {
-    margin: 5px;
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
-  
+}
+
+
+
+.team-lead-interfaces .alert {
+  font-size: 0.95rem;
+}

@@ -280,7 +280,12 @@ const capitalizeWords = (str) =>
   text-align: center;
   background-color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
 }
+
+
 
 .back-button {
   background: none;
