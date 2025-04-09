@@ -32,8 +32,8 @@ function Contact() {
         <p><strong>Email:</strong>your email</p>
         <p><strong>Phone:</strong> (123) 456-7890</p>
         <p><strong>Address:</strong> Washington, D.C.
-Capital of the United States of America
-</p>
+        Capital of the United States of America
+       </p>
       </div>
 
       {/* Contact Form */}

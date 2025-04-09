@@ -1,14 +1,22 @@
 /* src/components/Contact.css */
 .contact-container {
   max-width: 1200px;
-  margin: 0 auto;
+  margin:5px 0px 50px;
   padding: 40px;
   font-family: 'Arial', sans-serif;
   background-color: #f9f9f9;
   border-radius: 8px;
   opacity: 0;
   animation: fadeIn 1s ease-in-out forwards;
+  position: relative;
+  height: 100vh;
+  overflow-y: auto;
+
 }
+.contact-container::-webkit-scrollbar{
+  display: none;
+}
+
 
 @keyframes fadeIn {
   from {
@@ -84,6 +92,7 @@ h2 {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   opacity: 0;
+
   animation: fadeInUp 1.5s ease-in-out 0.2s forwards; /* Delay animation for form */
 }
 

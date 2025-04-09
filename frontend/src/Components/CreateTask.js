@@ -97,11 +97,12 @@ const CreateTask = () => {
     };
 
     return (
-        <div  className="create-task-container bg-body-tertiary">
-          <div className='border-1 bg-dark px-3 py-4 rounded' style={{boxShadow: '0 8px 14px rgba(143, 140, 140, 0.33)'}}>
+        <div  className="create-task-container ">
+          <div className='rounded' style={{boxShadow: '0 8px 14px rgb(143, 140, 140)'}}>
             <div><Sidebar /></div>
-            <h2>Create Task Module</h2>
+           
             <form onSubmit={handleSubmit}>
+            <h2 >Create Task Module</h2>
                 <input type="text" placeholder="Task Module Name " value={taskName} onChange={(e) => setTaskName(e.target.value)} required />
                 
                 <label>Start Date</label>

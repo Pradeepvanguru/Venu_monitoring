@@ -1,14 +1,13 @@
 .create-task-container {
-    margin: 10px 290px;
+    margin: 10px 300px;
     padding: 30px 160px;
-    width: 75%;
-    background: linear-gradient(135deg, #212122, #27273a, #0a0a0ab8);
+    width: 80%;
     color: white;
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(16, 15, 15, 0.971);
     text-align: center;
     height: 100vh;
     overflow-y: auto;
+    border: none;
     position: relative;
     
   }
@@ -20,14 +19,16 @@
     font-size: 25px;
     font-weight: 700;
     margin-bottom: 25px;
-    color: #fdfdfd;
+    color: #686161;
     text-shadow: 1px 1px 2px #aaa3a3bf;
   }
   
   .create-task-container form {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    padding: 5px 30px ;
+    gap: 5px;
+    background-color: #f1efef;
     text-align: left;
   }
   
@@ -35,7 +36,7 @@
     font-weight: 600;
     font-size: 14px;
     margin-bottom: 5px;
-    color: #f8f8f8;
+    color: #2b2b3c;
   }
   
   /* Input, textarea, date, file styles */
@@ -44,12 +45,12 @@
   .create-task-container input[type="file"],
   .create-task-container textarea {
     width: 100%;
-    padding: 10px 14px;
+    padding: 10px 19px;
     font-size: 15px;
-    background: rgba(255, 255, 255, 0.221);
+    background-color: rgba(2, 39, 72, 0.277);
     border: none;
     border-radius: 6px;
-    color: #fff;
+    color: #0e0e0e;
     transition: background 0.3s ease;
   }
   
@@ -57,7 +58,7 @@
   .create-task-container input[type="date"]:focus,
   .create-task-container input[type="file"]:focus,
   .create-task-container textarea:focus {
-    background: rgba(120, 119, 119, 0.216);
+    background: rgba(120, 119, 119, 0.546);
     outline: none;
     
   }
@@ -68,16 +69,15 @@
   }
   
   .create-task-container input[type="file"] {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.317);
   }
   
   /* Scrollbar hidden for textarea */
   .create-task-container .textarea {
     resize: vertical;
-    max-height: 150px;
-    min-height: 80px;
+    max-height: 100px;
+    min-height: 30px;
     overflow-y: auto;
-    width: 50%;
   }
   .create-task-container .textarea::-webkit-scrollbar {
     display: none;
