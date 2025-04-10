@@ -44,19 +44,100 @@
   position: relative;
 }
 
-/* Preview overlay */
-.team-lead-interfaces .preview-overlay {
+/* Modal wrapper - centered by default */
+.preview-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.794);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: auto;
+  height: auto;
   z-index: 1050;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 20px;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+}
+
+/* Modal content box */
+.modal-content {
+  padding: -15px 10px 0px ;
+  border-radius:10px;
+  z-index: 1060;
+  width: 90vw;
+  height: 100vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Zoom controls */
+.zoom-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Simple iframe styling – no zooming */
+.modal-content iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Minimized modal (bottom right corner) */
+.preview-modal.minimized {
+  top: auto !important;
+  left: auto !important;
+  right: 20px;
+  bottom: 20px;
+  transform: none;
+  width: 300px;
+  height: 180px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.preview-modal.minimized .modal-content {
+  max-width: 100%;
+  max-height: 100%;
+  overflow-y: scroll;
+}
+
+/* Maximized modal (fullscreen) */
+.preview-modal.maximized {
+  top: 0 !important;
+  left: 0 !important;
+  transform: none;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.preview-modal.maximized .modal-content {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0;
+}
+
+/* Zoom effect ONLY for images */
+.zoomed-image {
+  transform: scale(var(--zoom-scale, 1));
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+  max-width: 100%;
+  max-height: 100vh;
+  object-fit: contain;
 }
 
 /* File list section */
@@ -79,6 +160,6 @@
 /* iframe preview styling */
 .team-lead-interfaces iframe {
   border-radius: 10px;
-  padding: 30px 50px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding: 10px 30px;
+ 
 }

@@ -413,6 +413,7 @@ router.post('/submit-task', upload.single('file'), async (req, res) => {
 router.get('/data/:moduleId/count', async (req, res) => {
   try {
     const { moduleId } = req.params;
+    
     // console.log(moduleId)
 
     // Validate input
@@ -422,6 +423,8 @@ router.get('/data/:moduleId/count', async (req, res) => {
 
     // Find the task document by moduleId and get the count of submissions
     const task = await Task.findOne({ moduleId });
+    const NameID=task.team_id
+    const userName = await User.findOne({ team_id: NameID,email:task.assignEmail });
 
     if (!task) {
       return res.status(404).json({ message: 'Task not found for the given module ID' });
@@ -432,7 +435,7 @@ router.get('/data/:moduleId/count', async (req, res) => {
     // console.log(submissionsCount)
 
     // Respond with the count
-    res.status(200).json({ count: submissionsCount });
+    res.status(200).json({ count: submissionsCount,userName});
 
   } catch (error) {
     console.error('Error fetching submissions count:', error);
@@ -492,12 +495,17 @@ router.get('/datafetch/:email', authMiddleware, async (req, res) => {
 
   try {
     let files = [];
+    let newname = null;
 
     if (role === 'team-lead') {
       const teamLead = await User.findOne({ email });
-
       if (!teamLead) {
         return res.status(404).json({ message: 'Team not found for this team lead' });
+      }
+
+      const users = await User.findOne({ team_id: teamLead.team_id, email });
+      if (users) {
+        newname = users.name;
       }
 
       const teammates = await User.find({
@@ -506,8 +514,8 @@ router.get('/datafetch/:email', authMiddleware, async (req, res) => {
       });
 
       const teammateEmails = teammates.map(member => member.email);
-
       files = await Data.find({ assignEmail: { $in: teammateEmails } });
+
     } else if (role === 'employee') {
       files = await Data.find({ assignEmail: userEmail });
     } else {
@@ -518,14 +526,15 @@ router.get('/datafetch/:email', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'No data found here' });
     }
 
-    res.status(200).json({ success: true, files });
+    res.status(200).json({ success: true, files, newname });
+
   } catch (error) {
     console.error('Error fetching data by role:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-module.exports = router;
+
 
 
 router.get('/files/:moduleId', async (req, res) => {

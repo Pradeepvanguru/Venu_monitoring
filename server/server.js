@@ -54,6 +54,31 @@ app.use('/api/messages', messageRoutes);
         console.log(`User ${userId} joined room`);
       });
 
+      
+    socket.on('join room', (roomId) => {
+      socket.join(roomId)
+      console.log("user joined room:", roomId)
+  })
+      socket.on("typing", (roomId) => {
+        console.log(roomId)
+        socket.to(roomId).emit('typing')
+    })
+    socket.on("stop typing", (roomId) => {
+      socket.to(roomId).emit("stop typing")
+  })
+  
+
+  socket.on('newMessage', (newMessageRecieved) => {
+    var chat = newMessageRecieved.chat
+    if (!chat.users) return console.log('no users found in the chat')
+
+    chat.users.forEach(user => {
+        if (user._id.toString() == newMessageRecieved.sender._id) return
+        socket.to(user._id).emit('messageReceived', newMessageRecieved)
+        // console.log("message sent")
+    })
+})
+
       socket.on('sendMessage', async (data) => {
         try {
           const newMessage = new Message(data);
@@ -67,9 +92,23 @@ app.use('/api/messages', messageRoutes);
         }
       });
 
+
+      socket.emit("me", socket.id)
+
+      socket.on("callUser", (data) => {
+          io.to(data.userToCall).emit("callUser", { signal: data.signalData, from: data.from, name: data.name })
+      })
+  
+      socket.on("answerCall", (data) => {
+          io.to(data.to).emit("callAccepted", data.signal)
+      })
+  
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
+
+
 });
 
 

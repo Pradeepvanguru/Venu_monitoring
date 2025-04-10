@@ -125,7 +125,6 @@ const ForgotPassword = () => {
       {step === "forgot" && (
         <form onSubmit={handleForgotSubmit} style={styles.form}>
           <h4>Forgot Password</h4>
-          <label>Enter Email:</label>
           <input
             type="email"
             placeholder="Enter your email"

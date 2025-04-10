@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
- team_id: { type: String, required: true }, 
+  team_id: { type: String, required: true }, 
   taskName: { type: String, required: true },
   moduleSummury:{type:String, require:true},
   assignEmail: { type: [String], required: true },

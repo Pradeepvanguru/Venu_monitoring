@@ -242,8 +242,8 @@ const filteredUsers = users.filter(user =>
                     }}
     />
     <i
-      className="fa fa-search"
-      style={{
+       className="fa fa-search"
+       style={{
         position: "absolute",
         right: "4px",
         top: "50%",

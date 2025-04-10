@@ -1,17 +1,13 @@
-
-
 /* Team Lead Interface container */
 .team-lead-interface {
     display: flex;
     background-color: #ffffff;
     padding: 10px;
-    color: #ffffff;
+    color: #000000; /* Changed to black for readability */
     width: 100%;
     position: relative;
     height: 100vh;
 }
-
-
 
 /* Content wrapper for tasks */
 .content-wrapper {
@@ -24,24 +20,23 @@
     position: relative;
     overflow-y: auto;
 }
-.content-wrapper::-webkit-scrollbar{
+.content-wrapper::-webkit-scrollbar {
     display: none;
 }
 
 /* Refresh button */
 .refresh-btn {
     float: right;
-    margin-top: 0;
     background-color: #1326cc5d;
     color: #fff;
     border-radius: 5px;
-    padding: 6px 15px ;
+    padding: 6px 15px;
     margin-top: 47px;
     font-weight: 500;
     cursor: pointer;
     font-size: 0.9rem;
     transition: background-color 0.3s ease;
-    bottom: 1px solid #fff;
+    border-bottom: 1px solid #fff; /* Fixed property */
 }
 
 .refresh-btn:hover {
@@ -60,12 +55,9 @@
 
 /* Task List Container */
 .todo-list {
-    
     padding: 20px;
     width: 100%;
     border-radius: 12px;
-   
-    
 }
 
 /* Individual task item styling */
@@ -82,16 +74,21 @@
 .task-item:hover {
     background-color: #4c2f52;
     transform: scale(1.02);
-   
 }
 
-/* Task card for layout */
 .task-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 20px;
+    font-size: 10px;
+    margin: 5px 0;
+    padding: 10px !important;
     border-radius: 10px;
+    height: auto;
+    cursor: pointer;
+    background: #f9f9f9;
+    transition: 0.3s ease;
+}
+
+.task-card:hover {
+    background: #e9f7ef;
 }
 
 /* Task progress bar at the top */
@@ -99,7 +96,8 @@
     margin-bottom: 20px;
     color: white;
 }
-.task-progress p{
+
+.task-progress p {
     color: white;
 }
 
@@ -128,30 +126,41 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Date information */
-.task-date {
-    font-size: 0.9rem;
-    color: #b0b0b0;
-    margin-bottom: 5px;
+.task-dates {
+    font-weight: 600;
+    font-size: 10px;
 }
-.task-date strong{
-    color: white;
 
+.task-date strong {
+    color: white;
+}
+
+.task-info {
+    flex: 1;
+}
+
+.dots-icon {
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.toggle-arrow {
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 12px;
 }
 
 /* Button container */
 .task-card .delete {
     display: flex;
-   justify-content: flex-end;
+    justify-content: flex-end;
     gap: 10px;
     padding-top: 10px;
-    margin-top: -260px;
-    
+    position: relative; /* Better than negative margin for consistent layout */
 }
 
 /* Delete button */
 .task-card .p-2.m-2 button:nth-child(1) {
-    margin-right: 0;
     padding: 8px 16px;
     background-color: #e74c3c;
     color: #fff;
@@ -189,6 +198,7 @@
     margin-top: 40px;
     font-style: italic;
 }
+
 button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
