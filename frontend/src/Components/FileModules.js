@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { notification } from 'antd';
 
+
 const FileModules = () => {
  
   const [moduleId, setModuleId] = useState('');
@@ -21,6 +22,8 @@ const FileModules = () => {
   const [previous, setPrevious] = useState('');
   const [newname,setNewname]=useState('')
   const [newId, setNewId] = useState('');
+
+
   const token = localStorage.getItem('userToken');
   const role = localStorage.getItem('userRole');
   const loggedInUserEmail = localStorage.getItem('loggedInEmail');
@@ -29,15 +32,28 @@ const FileModules = () => {
  
 
   const imageRef = useRef(null);
-
-
-
   const [zoomLevel, setZoomLevel] = useState(1);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(false);
-  
   const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 1));
   const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.3));
+
+ 
+
+  const handleAction = async (moduleId, dayIndex, action,email) => {
+    try {
+      const res = await axios.post(`${process.env.REACT_APP_URL}/api/data/${moduleId}/${dayIndex}/${email}/action`, {
+        action
+      });
+      notification.info({message:""+res.data.message});
+      handlerefresh()
+      // Optionally: Refresh your files or data state here
+    } catch (error) {
+      console.error('Action error:', error);
+      alert('Failed to perform action');
+    }
+  };
+  
 
   
 
@@ -189,6 +205,18 @@ const FileModules = () => {
     img.style.height = `${originalHeight * scaleRatio}px`;
   };
   
+  // const handleClearAll = async () => {
+  //   if (window.confirm('Are you sure you want to delete all data?')) {
+  //     try {
+  //       await axios.delete(`${process.env.REACT_APP_URL}/api/clear-data`); // or /clear-task-submissions
+  //       alert('All data cleared!');
+  //       // Optionally refresh the table data here
+  //     } catch (err) {
+  //       console.error(err);
+  //       alert('Error clearing data');
+  //     }
+  //   }
+  // };
 
   return (
     <div className="team-lead-interfaces container mt-4">
@@ -237,7 +265,7 @@ const FileModules = () => {
       ) : (
         <form onSubmit={handleSearch} className="mb-4 w-50">
           <input type="date" value={moduleId} onChange={(e) => setModuleId(e.target.value)} className="form-control mb-2" />
-          <button type="submit" className="btn btn-success" disabled={!moduleId}>Submit</button>
+          <button type="submit" className="btn btn-success" disabled={!moduleId}>Search</button>
         </form>
       )}
 
@@ -262,7 +290,10 @@ const FileModules = () => {
             <u><strong>Files of {selectedUser?.name ||newname || selectedName }:</strong></u>
           </h5>
           <p className="text-danger"><strong>Files Count: {filteredFiles.length}</strong></p>
-
+          <>
+          {/* <button onClick={handleClearAll} className="btn btn-danger mb-2">
+           Clear All Data
+          </button> */}
           <div className="table-responsive">
             <table className="table table-bordered table-hover text-center mt-3">
               <thead className="table-secondary">
@@ -271,7 +302,8 @@ const FileModules = () => {
                   <th>Day/Date</th>
                   <th>Preview</th>
                   <th>Download</th>
-                  <th>Actions</th>
+                {role==='team-lead'? <><th>Actions</th> 
+                <th>Status</th></>:''}
                 </tr>
               </thead>
               <tbody>
@@ -297,15 +329,19 @@ const FileModules = () => {
                         <i className="fas fa-download"></i>
                       </button>
                     </td>
-                    <td>
-                      <button type="button" className="btn btn-success btn-sm">Accept</button>
-                      <button type="button" className="btn btn-danger btn-sm ms-2">Reject</button>
-                    </td>
+                    {role==='team-lead'?<><td>
+                      <button type="button" className="btn btn-success btn-sm"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'accept')}>Accept</button>
+                      <button type="button" className="btn btn-danger btn-sm ms-2"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'reject')}>Reject</button>
+                    </td> 
+                    <td>{file.Actions}</td>
+                    </>
+                    :''}
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table>   
           </div>
+          </>
         </div>
       )}
 

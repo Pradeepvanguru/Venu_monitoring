@@ -47,6 +47,7 @@ const TeamLeadInterface = () => {
                     );
                     const countRes = await axios.get(`${process.env.REACT_APP_URL}/api/data/${task.moduleId}/count`);
                     const submissionsCount = countRes.data.count;
+                    // console.log("count:",submissionsCount)
                     setuserDetails(countRes.data.userName.name)
                     const calculatedProgress = (submissionsCount / totalDays) * 100 || 0;
                     return { ...task, progress: Math.min(calculatedProgress, 100) };
@@ -98,10 +99,10 @@ const TeamLeadInterface = () => {
 
     const menuItems = (task) => (
         [
-            {
-              key: 'edit',
-              label: <span onClick={() => console.log("Edit", task._id)}>Edit</span>
-            },
+            // {
+            //   key: 'edit',
+            //   label: <span onClick={() => console.log("Edit", task._id)}>Edit</span>
+            // },
             {
               key: 'delete',
               label: <span onClick={() => handleDelete(task._id)}>Delete</span>
@@ -133,11 +134,11 @@ const TeamLeadInterface = () => {
                      className="fa fa-search"
                     style={{
                         position: "absolute",
-                        right: "550px",
+                        right: "500px",
                         top: "110px",
                         transform: "translateY(-50%)",
                         fontSize: "20px",
-                        color: "#666fff",
+                        color: "#fffff",
                         cursor: "pointer",
                         transition: "0.3s ease-in-out",
                     }}
@@ -160,10 +161,9 @@ const TeamLeadInterface = () => {
                                 <div className="d-flex justify-content-between align-items-start py-4 ">
                     
                                     <div className="task-info">
-                                    <button className='btn btn-warning'    onClick={() => handleClickCard(task)}  style={{float:'right',padding:'5px',margin:'30px'}}>Daily Work</button>
-                                    <center> <p><strong>Task:</strong> {task.taskName}</p></center>
+                                    <button className='btn btn-outline-primary text-dark'    onClick={() => handleClickCard(task)}  style={{float:'right',padding:'5px',margin:'30px'}}>Check Daily Work</button>
+                                    <center className='fs-6'> <p><strong>Task:</strong> {task.taskName}</p></center>
                                         <div className="d-flex align-items-center mx-2">
-                                            
                                             <span className="task-dates" >
                                            <strong className='text-secondary'> <h6>Name: {userDetails}</h6></strong>
                                            

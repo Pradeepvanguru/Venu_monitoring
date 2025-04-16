@@ -25,8 +25,12 @@ const TaskProgressBar = ({ moduleID }) => {
         const daysBetween = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
         setTotalDays(daysBetween);
 
+         // Fetch accepted submission count
+         const countRes = await axios.get(`${process.env.REACT_APP_URL}/api/data/${task.moduleId}/count`);
+         setDaysSubmitted(countRes.data.count);
+
         // Set days submitted from task data if it's saved
-        setDaysSubmitted(task.submissions ? task.submissions.length : 0); // If submissions are saved in DB
+        // setDaysSubmitted(task.submissions ? task.submissions.length : 0); // If submissions are saved in DB
 
         // Track the last submission date
         if (task.submissions && task.submissions.length > 0) {
@@ -80,8 +84,7 @@ const TaskProgressBar = ({ moduleID }) => {
     <div className="progress-bar-container">
       {taskData ? (
         <div>
-          <h4>Your Progress Here: {progress}%</h4>
-          <p>Days Submitted: {daysSubmitted}/{totalDays}</p>
+          <p>Days: {daysSubmitted}/{totalDays}</p>
           <div className="p-3">
             <BootstrapProgressBar now={progress} label={`${Math.round(progress)}%`} />
             <p>{`Progress: ${Math.round(progress)}%`}</p>
@@ -114,8 +117,7 @@ const TaskProgressBar = ({ moduleID }) => {
             padding: 10px;
             width: 100%;
             margin: 0 auto;
-            background-color:rgb(173, 171, 171);
-            box-shadow: 10px 4px 10px rgba(0, 0, 0.1, 0.1);
+            background-color:rgba(85, 102, 118, 0.2);
             border-radius: 8px;
             text-align: center;
             transition: transform 0.3s ease-in-out;
