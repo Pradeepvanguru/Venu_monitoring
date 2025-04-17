@@ -16,6 +16,7 @@ const authMiddleware = require('../middleware/authMiddleware'); // Ensure you ha
 const router = express.Router();
 
 
+
 const generateAccessKey = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -340,68 +341,189 @@ router.get('/task-modules/:moduleId', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
   }
 });
-
-
-router.post('/submit-task', upload.single('file'), async (req, res) => {
+    // DELETE Task Submission by dayIndex, assignEmail, and moduleId
+router.delete('/delete-task', async (req, res) => {
   try {
-    // Extract data from the request body
+    const { dayIndex, assignEmail, moduleId } = req.body;
+
+    // Validate input data
+    if (!dayIndex || !assignEmail || !moduleId) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    // Find the task
+    const task = await Task.findOne({ moduleId, assignEmail });
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found.' });
+    }
+
+    // Check dayIndex validity
+    if (dayIndex < 1 || dayIndex > task.submissions.length) {
+      return res.status(400).json({ message: 'Invalid dayIndex.' });
+    }
+
+    // Get the submission to delete (before splicing)
+    const deletedSubmission = task.submissions[dayIndex - 1];
+    const fileName = deletedSubmission?.fileName; // Adjust if your object has a different key
+
+    // Remove the submission
+    task.submissions.splice(dayIndex - 1, 1);
+    await task.save();
+
+    // Delete from Data collection
+    await Data.findOneAndDelete({ moduleId, assignEmail, dayIndex });
+
+    // Delete file from uploads folder if fileName exists
+    if (fileName) {
+      const filePath = path.join(__dirname, '..', 'uploads', fileName);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Error deleting file:', err.message);
+          // Don't return error here — file might already be gone
+        }
+      });
+    }
+
+    return res.status(200).json({ message: 'Submission and associated file deleted successfully.' });
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ message: 'Server error while deleting submission.' });
+  }
+});
+
+
+
+
+
+
+
+//submit task-----------------------------------------------------------------------------------------------------------------------
+
+
+// router.delete('/clear-data', async (req, res) => {
+//   const { teamId, moduleId, assignEmail } = req.body;
+
+//   if (!teamId || !moduleId || !assignEmail) {
+//     console.log(teamId,'id')
+//     return res.status(400).json({ message: 'Missing teamId, moduleId, or assignEmail' });
+//   }
+
+//   try {
+//     // Update Task: remove only matching submissions
+//     await Task.updateMany(
+//       {},
+//       {
+//         $pull: {
+//           submissions: {
+//             teamId,
+//             moduleId,
+//             assignEmail
+//           }
+//         }
+//       }
+//     );
+
+//     // Delete Data documents matching the criteria
+//     await Data.deleteMany({ teamId, moduleId, assignEmail });
+
+//     // Path to the uploads directory
+//     const uploadDir = path.join(__dirname, '..', 'uploads');
+
+//     // Read all files in uploads directory
+//     fs.readdir(uploadDir, (err, files) => {
+//       if (err) {
+//         console.error('Error reading uploads directory:', err);
+//         return res.status(500).json({ message: 'Error reading uploads directory', error: err.message });
+//       }
+
+//       // Define a basic filename pattern (adjust based on your naming convention)
+//       const matchString = `${teamId}_${moduleId}_${assignEmail}`.replace(/[@.]/g, '_');
+
+//       // Delete matching files
+//       for (const file of files) {
+//         if (file.includes(matchString)) {
+//           fs.unlink(path.join(uploadDir, file), err => {
+//             if (err) console.error(`Error deleting file ${file}:`, err);
+//           });
+//         }
+//       }
+//     });
+
+//     res.status(200).json({ message: 'Selected task submissions and files deleted.' });
+//   } catch (error) {
+//     console.error('Error clearing data:', error);
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// });
+
+
+
+router.post('/submit-task', upload.single('files'), async (req, res) => {
+  try {
     const { moduleId, assignEmail, dayIndex } = req.body;
 
-    // Ensure a file is uploaded
     if (!req.file) {
       return res.status(400).json({ message: 'File is required' });
     }
-    
-    const fileUrl = req.file.path; // Get the file path from multer
 
-    // Validate input data
+    const fileUrl = req.file.path;
+
     if (!moduleId || !assignEmail || !dayIndex) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Fetch task details
+    // Fetch task data
     const taskData = await Task.findOne({ assignEmail });
 
     if (!taskData) {
       return res.status(404).json({ message: 'Task not found for the given email' });
     }
 
-    const team_id = taskData.team_id;  // Extract T_id from the found task
+    const team_id = taskData.team_id;
 
-    // Step 1: Save the data into the Data collection
-    const newData = new Data({
-      moduleId,
-      assignEmail,
-      dayIndex,
-      fileUrl,
-      team_id
-    });
-
-    await newData.save();
-
-    // Step 2: Update the Tasks collection
-    const submission = {
-      filePath: fileUrl,
-      assignedEmail: assignEmail,
-      day: dayIndex.toString(), // Convert to string if necessary
-    };
-
-    const task = await Task.findOne({ moduleId, assignEmail });
-
-    if (!task) {
-      return res.status(404).json({ message: 'No matching task found' });
-    }
-
-    const result = await Task.updateOne(
-      { moduleId, assignEmail },
-      { $push: { submissions: submission } }
+    // 🟡 Step 1: Upsert (update if exists, insert if not) into Data collection
+    await Data.findOneAndUpdate(
+      { moduleId, assignEmail, dayIndex },
+      {
+        moduleId,
+        assignEmail,
+        dayIndex,
+        fileUrl,
+        team_id
+      },
+      { upsert: true, new: true }
     );
 
-    if (result.matchedCount === 0) {
-      console.error('No matching document found');
+    // 🟢 Step 2: Check if a submission already exists for this day in Task
+    const task = await Task.findOne({ moduleId, assignEmail, 'submissions.day': dayIndex.toString() });
+
+    if (task) {
+      // Update existing submission
+      await Task.updateOne(
+        { moduleId, assignEmail, 'submissions.day': dayIndex.toString() },
+        {
+          $set: {
+            'submissions.$.filePath': fileUrl,
+            'submissions.$.action': 'pending'
+          }
+        }
+      );
+    } else {
+      // Push new submission
+      const submission = {
+        filePath: fileUrl,
+        assignedEmail: assignEmail,
+        day: dayIndex.toString(),
+        action: 'pending'
+      };
+
+      await Task.updateOne(
+        { moduleId, assignEmail },
+        { $push: { submissions: submission } }
+      );
     }
 
-    // Step 3: Respond with success message
     return res.status(200).json({ message: 'Task submitted successfully' });
 
   } catch (error) {
@@ -409,6 +531,8 @@ router.post('/submit-task', upload.single('file'), async (req, res) => {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+
 
 router.get('/data/:moduleId/count', async (req, res) => {
   try {
@@ -431,8 +555,14 @@ router.get('/data/:moduleId/count', async (req, res) => {
     }
 
     // Get the count of submissions
-    const submissionsCount = task.submissions.length;
+    // const submissionsCount = task.submissions.length;
     // console.log(submissionsCount)
+
+    const submissionsCount = await Data.countDocuments({
+      moduleId,
+      Actions: 'accept'
+    });
+
 
     // Respond with the count
     res.status(200).json({ count: submissionsCount,userName});
@@ -443,26 +573,83 @@ router.get('/data/:moduleId/count', async (req, res) => {
   }
 });
 
-// DELETE route to delete a task by ID (use the correct field, e.g., _id)
+
+// DELETE route to delete a task by ID
 router.delete('/tasks/:taskId', async (req, res) => {
-  const { taskId } = req.params; // Extract taskId from URL parameter
+  const { taskId } = req.params;
 
   try {
-    // Find and delete the task by _id
-    const deletedTask = await Task.findByIdAndDelete(taskId);
+    // Step 1: Find the task (to access teamId and moduleId)
+    const task = await Task.findById(taskId);
 
-    // If no task is found, return a 404 error
-    if (!deletedTask) {
+    if (!task) {
+      console.log("No task found with ID:", taskId);
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    // Return a success message
-    res.status(200).json({ message: 'Task deleted successfully', deletedTask });
+    const { teamId, moduleId } = task;
+
+    if (!teamId || !moduleId) {
+      console.warn(`❗ Missing teamId or moduleId in task: ${taskId}`);
+    }
+
+    // Step 2: Delete the task
+    const deletedTask = await Task.findByIdAndDelete(taskId);
+    console.log('✅ Deleted Task:', deletedTask);
+
+    // Step 3: Delete related Data if teamId and moduleId are available
+    if (teamId && moduleId) {
+      const dataDeleteResult = await Data.deleteMany({ teamId, moduleId });
+      console.log(`🗑️ Deleted ${dataDeleteResult.deletedCount} Data entries`);
+
+      // Remove submissions from other tasks
+      const submissionUpdateResult = await Task.updateMany(
+        {},
+        { $pull: { submissions: { teamId, moduleId } } }
+      );
+      console.log(`🔄 Updated ${submissionUpdateResult.modifiedCount} tasks to remove submissions`);
+
+      // Step 4: Delete related files from /uploads
+      const uploadDir = path.join(__dirname, '..', 'uploads');
+      const matchString = `${teamId}_${moduleId}`.replace(/[@.]/g, '_');
+
+      fs.readdir(uploadDir, (err, files) => {
+        if (err) {
+          console.error('⚠️ Error reading uploads directory:', err);
+        } else {
+          files.forEach(file => {
+            if (file.includes(matchString)) {
+              const filePath = path.join(uploadDir, file);
+              fs.unlink(filePath, err => {
+                if (err) {
+                  console.error(`❌ Error deleting file ${file}:`, err);
+                } else {
+                  console.log(`✅ Deleted file: ${file}`);
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // Final Response
+    return res.status(200).json({
+      message: 'Task and related data deleted successfully',
+      deletedTask
+    });
+
   } catch (error) {
-    console.error('Error deleting task:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('🔥 Error deleting task and related data:', error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+
+
+
+
+
 
 
 
@@ -623,7 +810,47 @@ router.get('/download-file/:moduleId/:dayIndex', async (req, res) => {
 });
 
 
+router.post('/data/:moduleId/:dayIndex/:email/action', async (req, res) => {
+  const { moduleId, dayIndex } = req.params;
+  const { action } = req.body;
 
+  if (!['accept', 'reject'].includes(action)) {
+    return res.status(400).json({ message: 'Invalid action' });
+  }
+
+  try {
+    const data = await Data.findOneAndUpdate(
+      { moduleId, dayIndex },
+      { Actions: action },
+      { new: true }
+    );
+
+    if (!data) {
+      return res.status(404).json({ message: 'Data not found' });
+    }
+
+    // Update the corresponding submission's action in Task
+    const task = await Task.findOne({ moduleId });
+
+    if (task) {
+      const submission = task.submissions.find(
+        s => s.day === dayIndex.toString()
+      );
+
+      if (submission) {
+        submission.action = action;
+        await task.save();
+      }
+    }
+
+    // ✅ Send response only once
+    res.status(200).json({ message: `Successfully ${action} today task !`, data });
+
+  } catch (error) {
+    console.error('Action update error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 
 

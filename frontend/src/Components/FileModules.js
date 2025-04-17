@@ -365,8 +365,8 @@ const FileModules = () => {
         />
       )}
             <div className="zoom-controls">
-              <button className="btn btn-sm btn-info" onClick={handleZoomIn}>Zoom In</button>
-              <button className="btn btn-sm btn-info" onClick={handleZoomOut}>Zoom Out</button>
+              {/* <button className="btn btn-sm btn-info" onClick={handleZoomIn}>Zoom In</button>
+              <button className="btn btn-sm btn-info" onClick={handleZoomOut}>Zoom Out</button> */}
               <button className="btn btn-sm btn-danger" onClick={closePreview}>Close</button>
             </div>
           </div>

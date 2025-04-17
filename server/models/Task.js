@@ -14,6 +14,7 @@ const taskSchema = new mongoose.Schema({
     filePath: String,
     assignEmail: String,
     day: String,
+    action:String,
     createdAt: { type: Date, default: Date.now },
   }],
 }, { timestamps: true });
