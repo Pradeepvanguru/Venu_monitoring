@@ -1,7 +1,9 @@
 // models/Task.js
+const { types } = require('mime-types');
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
+ assignName:{type: String,required:true},
   team_id: { type: String, required: true }, 
   taskName: { type: String, required: true },
   moduleSummury:{type:String, require:true},

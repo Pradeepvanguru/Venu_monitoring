@@ -15,7 +15,6 @@ const TeamLeadInterface = () => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedTaskId, setExpandedTaskId] = useState(null);
-    const [userDetails,setuserDetails]=useState()
     const navigate = useNavigate();
     const token = localStorage.getItem('userToken');
 
@@ -47,8 +46,6 @@ const TeamLeadInterface = () => {
                     );
                     const countRes = await axios.get(`${process.env.REACT_APP_URL}/api/data/${task.moduleId}/count`);
                     const submissionsCount = countRes.data.count;
-                    // console.log("count:",submissionsCount)
-                    setuserDetails(countRes.data.userName.name)
                     const calculatedProgress = (submissionsCount / totalDays) * 100 || 0;
                     return { ...task, progress: Math.min(calculatedProgress, 100) };
                 } catch (error) {
@@ -124,7 +121,7 @@ const TeamLeadInterface = () => {
                 <div>
                 <input
                     type="text"
-                    className="form-control mb-2 w-50 bg-secondary"
+                    className="form-control mb-2 w-50"
                     placeholder="Search by task name..."
                     value={searchTerm}
                     onChange={handleSearch}
@@ -146,6 +143,7 @@ const TeamLeadInterface = () => {
 
                 {error && <div className="alert alert-danger">{error}</div>}
                 </div>
+                {filteredTasks.length>0 ? (
                 <ul className="list-group">
                     {filteredTasks.map(task => {
                         const progress = task.progress ?? 0;
@@ -165,7 +163,7 @@ const TeamLeadInterface = () => {
                                     <center className='fs-6'> <p><strong>Task:</strong> {task.taskName}</p></center>
                                         <div className="d-flex align-items-center mx-2">
                                             <span className="task-dates" >
-                                           <strong className='text-secondary'> <h6>Name: {userDetails}</h6></strong>
+                                           <strong className='text-secondary'> <h6>Name: {task.assignName}</h6></strong>
                                            
                                                 {start} → {end}
                                             </span>
@@ -204,6 +202,12 @@ const TeamLeadInterface = () => {
                         );
                     })}
                 </ul>
+                ): (
+             <center> <div className="employee-dashboard__no-tasks mt-5">
+                <p>No tasks available</p>
+                <p>Overview of tasks, progress, and upcoming deadlines.</p>
+              </div></center>
+            )}
             </div>
         </div>
     );

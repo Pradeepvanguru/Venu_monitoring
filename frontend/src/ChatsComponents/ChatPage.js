@@ -157,7 +157,7 @@ const ChatPage = () => {
                 setNewMessage('');
                 setFile(null); 
                 setfileName(null)
-                notify();
+                // notify();
             }
         } catch (err) {
             console.error("Error sending message:", err);

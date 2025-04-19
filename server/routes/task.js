@@ -10,6 +10,7 @@ const upload = require('../middleware/uploads');
 const mime = require('mime-types');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware'); // Ensure you have an auth middleware
+const transporter = require('../util/transporter'); // adjust the path as needed
 
 
 
@@ -39,14 +40,15 @@ const storage = multer.diskStorage({
 
 
 
-// Create transporter object using nodemailer for sending emails
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+
+// // Create transporter object using nodemailer for sending emails
+// const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         user: process.env.EMAIL_USER,
+//         pass: process.env.EMAIL_PASS
+//     }
+// });
 
 
 //fetch the task based on the team-lead
@@ -108,52 +110,77 @@ const sendTaskEmail = async ({ taskName, assignEmail, startDate, endDate, taskFi
 
 
 router.post('/tasks', authMiddleware, upload.single('taskFile'), async (req, res) => {
-  const { assignEmail, taskName, startDate, endDate,  moduleSummury } = req.body;
+  const { assignEmail, taskName, startDate, endDate, moduleSummury, assignedMembers } = req.body;
   const taskFile = req.file ? req.file.path : null;
- 
 
   try {
-      // Find the logged-in user
-      const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-      if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-      }
+    const team_id = user.team_id;
+    if (!taskFile) return res.status(400).json({ error: 'Task file is required' });
 
-      const team_id = user.team_id;
+    const parsedEmails = JSON.parse(assignEmail);
+    const parsedMembers = JSON.parse(assignedMembers);
 
-      if (!taskFile) {
-          return res.status(400).json({ error: 'Task file is required' });
-      }
+    if (!Array.isArray(parsedEmails) || parsedEmails.length === 0) {
+      return res.status(400).json({ error: 'assignEmail must be a non-empty array' });
+    }
 
-      // Parse the assignEmail string (which should be a JSON array)
-      const parsedEmails = JSON.parse(assignEmail);
+    const tasks = await Promise.all(parsedEmails.map(async (email) => {
+      const member = parsedMembers.find(m => m.email === email);
+      const ModuleId = generateAccessKey();
 
-      if (!Array.isArray(parsedEmails) || parsedEmails.length === 0) {
-          return res.status(400).json({ error: 'assignEmail must be a non-empty array' });
-      }
+      const newTask = new Task({
+        assignName: member.name,
+        taskName,
+        startDate,
+        endDate,
+        taskFile,
+        team_id,
+        moduleSummury,
+        moduleId: ModuleId,
+        assignEmail: email
+      });
 
-      // Create task for each email
-      const tasks = await Promise.all(parsedEmails.map(async (email) => {
-        const ModuleId=generateAccessKey()
-          const newTask = new Task({
-              taskName,
-              startDate,
-              endDate,
-              taskFile,
-              team_id,
-              moduleSummury,
-              moduleId:ModuleId,
-              assignEmail: email
-          });
-          return await newTask.save();
-      }));
+      const savedTask = await newTask.save();
 
-      res.status(201).json({ message: 'Tasks created successfully', tasks });
+      // Send official format email
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: `New Task Assigned: ${taskName}`,
+        html: `
+          <p>Dear <b>${member.name}</b>,</p>
+          <p>You have been assigned a new task by <b>${user.name}</b>.</p>
+          <h3>Task Details:</h3>
+          <ul>
+            <li><b>Task Name:</b> ${taskName}</li>
+            <li><b>Start Date:</b> ${new Date(startDate).toLocaleDateString()}</li>
+            <li><b>End Date:</b> ${new Date(endDate).toLocaleDateString()}</li>
+            <li><b>Module Summary:</b> ${moduleSummury}</li>
+            <li><b>Module ID:</b> ${ModuleId}</li>
+          </ul>
+          <p>Please refer to the attached file for more information.</p>
+          <p>Best regards,<br/>Team Management System</p>
+        `,
+        attachments: [
+          {
+            filename: path.basename(taskFile),
+            path: taskFile
+          }
+        ]
+      };
+
+      await transporter.sendMail(mailOptions);
+      return savedTask;
+    }));
+
+    res.status(201).json({ message: 'Tasks created and emails sent successfully', tasks });
 
   } catch (err) {
-      console.error("Error creating tasks:", err);
-      res.status(500).json({ error: 'Error creating tasks', details: err.message });
+    console.error("Error creating tasks:", err);
+    res.status(500).json({ error: 'Error creating tasks', details: err.message });
   }
 });
 
@@ -341,7 +368,8 @@ router.get('/task-modules/:moduleId', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
   }
 });
-    // DELETE Task Submission by dayIndex, assignEmail, and moduleId
+   
+// DELETE Task Submission by dayIndex, assignEmail, and moduleId
 router.delete('/delete-task', async (req, res) => {
   try {
     const { dayIndex, assignEmail, moduleId } = req.body;
@@ -365,7 +393,7 @@ router.delete('/delete-task', async (req, res) => {
 
     // Get the submission to delete (before splicing)
     const deletedSubmission = task.submissions[dayIndex - 1];
-    const fileName = deletedSubmission?.fileName; // Adjust if your object has a different key
+    const fileName = deletedSubmission?.filePath; // Adjust if your object has a different key
 
     // Remove the submission
     task.submissions.splice(dayIndex - 1, 1);
@@ -376,7 +404,7 @@ router.delete('/delete-task', async (req, res) => {
 
     // Delete file from uploads folder if fileName exists
     if (fileName) {
-      const filePath = path.join(__dirname, '..', 'uploads', fileName);
+      const filePath = path.join(__dirname,'..', fileName);
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error('Error deleting file:', err.message);
@@ -523,6 +551,53 @@ router.post('/submit-task', upload.single('files'), async (req, res) => {
         { $push: { submissions: submission } }
       );
     }
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,      // your app email
+        pass: process.env.EMAIL_PASS// app password
+  }
+    });
+    
+   
+   const teamLeaderEmail = await User.findOne({ team_id, role: 'team-lead' });
+    const T_Email=teamLeaderEmail.email
+    console.log(T_Email)
+    const mailOptions = {
+      from: `"${assignEmail}" <${process.env.EMAIL_USER}>`, // Display name as employee, but actually from app
+      to: T_Email,
+      replyTo: assignEmail, // replies will go to the employee
+      subject: `Teammate Task Submission Notification`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; max-width: 600px; margin: auto; background-color: #f9f9f9;">
+          <h2 style="color: #333;">Task Submission Alert</h2>
+          <p style="font-size: 16px; color: #555;">Dear <strong>Team Leader</strong>,</p>
+    
+          <p style="font-size: 16px; color: #555;">
+            The task for 
+            <span style="background-color: #e6f4ea; color: #2e7d32; padding: 4px 8px; border-radius: 5px;"><strong>Day ${dayIndex}</strong></span> 
+            has been submitted by your teammate 
+            <span style="background-color: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 5px;"><strong>${taskData.assignName}</strong></span>.
+          </p>
+    
+          <p style="font-size: 16px; color: #555;">Please review it at your convenience.</p>
+    
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;" />
+    
+          <p style="font-size: 14px; color: #999;">Regards,<br/>Task Management System</p>
+        </div>
+      `,
+    };
+    
+    
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ message: 'Failed to send email' });
+      }
+      console.log('Email sent:', info.response);
+      res.status(200).json({ message: 'Task submitted and email sent to team leader.' });
+    });
 
     return res.status(200).json({ message: 'Task submitted successfully' });
 
@@ -548,7 +623,7 @@ router.get('/data/:moduleId/count', async (req, res) => {
     // Find the task document by moduleId and get the count of submissions
     const task = await Task.findOne({ moduleId });
     const NameID=task.team_id
-    const userName = await User.findOne({ team_id: NameID,email:task.assignEmail });
+    const userName = await User.find({ team_id: NameID,email:task.assignEmail });
 
     if (!task) {
       return res.status(404).json({ message: 'Task not found for the given module ID' });
@@ -810,9 +885,10 @@ router.get('/download-file/:moduleId/:dayIndex', async (req, res) => {
 });
 
 
+
 router.post('/data/:moduleId/:dayIndex/:email/action', async (req, res) => {
   const { moduleId, dayIndex } = req.params;
-  const { action } = req.body;
+  const { action, teammateEmail, teammateName, actionByEmail,actionByName } = req.body;
 
   if (!['accept', 'reject'].includes(action)) {
     return res.status(400).json({ message: 'Invalid action' });
@@ -843,14 +919,72 @@ router.post('/data/:moduleId/:dayIndex/:email/action', async (req, res) => {
       }
     }
 
-    // ✅ Send response only once
-    res.status(200).json({ message: `Successfully ${action} today task !`, data });
+    // Define team lead (actionBy) and employee (teammate)
+    const teamLead = {
+      name: actionByName,
+      email: actionByEmail
+    };
 
+    const employee = {
+      name: teammateName,
+      email: teammateEmail
+    };
+
+    // Create transporter using your SMTP email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,      // your app email
+        pass: process.env.EMAIL_PASS// app password
+      }
+    });
+
+    // Email options
+    const mailOptions = {
+      from: `"${teamLead.email}" <${process.env.EMAIL_USER}>`,
+      to: employee.email,
+      replyTo: teamLead.email,
+      subject: `Task ${action}ed by ${teamLead.name}`,
+      text: `Hi ${employee.name},\n\nYour task for day ${dayIndex} has been ${action}ed by Team Leader. Check once your Submission status.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+          <h2 style="color: #2c3e50;">Task Status Update</h2>
+          <p>Dear <strong>${employee.name}</strong>,</p>
+    
+          <p>Your task for <strong style="color: #2980b9;">Day ${dayIndex}</strong> has been 
+          <strong style="color: ${action === "accept" ? "#27ae60" : "#c0392b"};">${action}ed</strong> 
+          by Your Team Leader (<strong>${teamLead.name}</strong>).</p>
+    
+          <p>Please log in to the system to verify your submission status.</p>
+    
+          <hr style="margin: 20px 0;" />
+    
+          <p style="font-size: 14px; color: #999;">This is an automated email from the Task Management System.Do not reply</p>
+        </div>
+      `
+    };
+    
+
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+
+    // ✅ Final response
+    res.status(200).json({ message: `Successfully ${action}ed today's task!`, data });
+  
+
+    
   } catch (error) {
     console.error('Action update error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 
 
 

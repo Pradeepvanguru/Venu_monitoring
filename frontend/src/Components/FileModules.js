@@ -15,13 +15,12 @@ const FileModules = () => {
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [error, setError] = useState('');
   const [showInput, setShowInput] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [fileUrl, setFileUrl] = useState('');
   const [teamMembers, setTeamMembers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [previous, setPrevious] = useState('');
   const [newname,setNewname]=useState('')
   const [newId, setNewId] = useState('');
+  const [newemail,setEmail]=useState()
 
 
   const token = localStorage.getItem('userToken');
@@ -29,24 +28,26 @@ const FileModules = () => {
   const loggedInUserEmail = localStorage.getItem('loggedInEmail');
   const selectedName = localStorage.getItem('userName');
   const selectedTask = JSON.parse(localStorage.getItem("selectedTask"));
+  
  
 
-  const imageRef = useRef(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [minimized, setMinimized] = useState(false);
-  const [maximized, setMaximized] = useState(false);
-  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 1));
-  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.3));
-
- 
-
-  const handleAction = async (moduleId, dayIndex, action,email) => {
+  const handleAction = async (moduleId, dayIndex, action) => {
+    const email=newemail
+    const selectedName = localStorage.getItem('userName');
+    const teamleadEmail = localStorage.getItem('loggedInEmail');
     try {
       const res = await axios.post(`${process.env.REACT_APP_URL}/api/data/${moduleId}/${dayIndex}/${email}/action`, {
-        action
+        action,
+        teammateEmail: email, // send teammate's email
+        teammateName: selectedUser?.name || newname || selectedName,
+        actionByName: selectedName,
+        actionByEmail:teamleadEmail
+        
       });
+      console.log(email, selectedUser?.name ||newname || selectedName,"oooooo")
       notification.info({message:""+res.data.message});
       handlerefresh()
+      
       // Optionally: Refresh your files or data state here
     } catch (error) {
       console.error('Action error:', error);
@@ -112,8 +113,10 @@ const FileModules = () => {
 
   useEffect(() => {
     const email = selectedUser?.email || newId;
+    console.log(email,"emiald")
     if (email) {
-      fetchFilesByEmail(email);
+      fetchFilesByEmail(email); 
+      setEmail(email)
   
       if (selectedUser?.email) {
         localStorage.removeItem("selectedTask");
@@ -174,49 +177,10 @@ const FileModules = () => {
   };
 
   const handlePreview = (moduleId, dayIndex) => {
-    setFileUrl(`${process.env.REACT_APP_URL}/api/view-file/${moduleId}/${dayIndex}`);
-    setShowPreview(true);
-  };
+    window.open(`/file-preview/${encodeURIComponent(moduleId)}/${encodeURIComponent(dayIndex)}`, '_blank');
 
-  const closePreview = () => {
-    setShowPreview(false);
-    setFileUrl('');
-  };
-
-
-
-
-  const handleImageLoad = () => {
-    
-    const img = imageRef.current;
-    if (!img) return;
-
-    const modalWidth = 800; // Or get this dynamically
-    const modalHeight = 600;
-
-    const originalWidth = img.naturalWidth;
-    const originalHeight = img.naturalHeight;
-
-    const widthRatio = modalWidth / originalWidth;
-    const heightRatio = modalHeight / originalHeight;
-    const scaleRatio = Math.min(widthRatio, heightRatio, 1); // Never upscale
-
-    img.style.width = `${originalWidth * scaleRatio}px`;
-    img.style.height = `${originalHeight * scaleRatio}px`;
   };
   
-  // const handleClearAll = async () => {
-  //   if (window.confirm('Are you sure you want to delete all data?')) {
-  //     try {
-  //       await axios.delete(`${process.env.REACT_APP_URL}/api/clear-data`); // or /clear-task-submissions
-  //       alert('All data cleared!');
-  //       // Optionally refresh the table data here
-  //     } catch (err) {
-  //       console.error(err);
-  //       alert('Error clearing data');
-  //     }
-  //   }
-  // };
 
   return (
     <div className="team-lead-interfaces container mt-4">
@@ -287,7 +251,7 @@ const FileModules = () => {
           </button>
 
           <h5 className="text-primary">
-            <u><strong>Files of {selectedUser?.name ||newname || selectedName }:</strong></u>
+            <u><strong>Files of {selectedUser?.name || newname || selectedName }:</strong></u>
           </h5>
           <p className="text-danger"><strong>Files Count: {filteredFiles.length}</strong></p>
           <>
@@ -330,10 +294,16 @@ const FileModules = () => {
                       </button>
                     </td>
                     {role==='team-lead'?<><td>
-                      <button type="button" className="btn btn-success btn-sm"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'accept')}>Accept</button>
-                      <button type="button" className="btn btn-danger btn-sm ms-2"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'reject')}>Reject</button>
+                      <button type="button" className="btn btn-success btn-sm"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'accept')}>Aproved</button>
+                      <button type="button" className="btn btn-danger btn-sm ms-2"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'reject')}>Not Saticefied </button>
                     </td> 
-                    <td>{file.Actions}</td>
+                    <td>
+                    <b style={{ color: file.Actions === 'accept' ? 'green' : file.Actions === 'reject' ? 'red' : 'black' }}>
+                      {file.Actions.charAt(0).toUpperCase() + file.Actions.slice(1)}
+                    </b>
+                  </td>
+
+
                     </>
                     :''}
                   </tr>
@@ -344,35 +314,6 @@ const FileModules = () => {
           </>
         </div>
       )}
-
-      {showPreview && (
-        <div className={`preview-modal ${minimized ? 'minimized' : ''} ${maximized ? 'maximized' : ''}`}>
-          <div className="modal-content">
-          {fileUrl.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
-        <img
-          src={fileUrl}
-          alt="Preview"
-          ref={imageRef}
-          className="zoomed-image"
-          style={{ '--zoom-scale': zoomLevel }}
-          onLoad={handleImageLoad}
-        />
-      ) : (
-        <iframe
-          src={fileUrl}
-          title="File Preview"
-          style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center center' }}
-        />
-      )}
-            <div className="zoom-controls">
-              {/* <button className="btn btn-sm btn-info" onClick={handleZoomIn}>Zoom In</button>
-              <button className="btn btn-sm btn-info" onClick={handleZoomOut}>Zoom Out</button> */}
-              <button className="btn btn-sm btn-danger" onClick={closePreview}>Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-
 
     </div>
   );

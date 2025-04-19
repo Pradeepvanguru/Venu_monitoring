@@ -5,8 +5,6 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');  // Authentication routes
 const taskRoutes = require('./routes/task');  // Task routes
-const path = require('path');
-const fs = require('fs');
 const mime = require('mime-types');
 const Data = require('./models/Data'); // Import your Data model
 const messageRoutes = require('./routes/messageRoutes');
@@ -14,8 +12,12 @@ const http = require('http');
 const { Server } = require('socket.io');
 const authMiddleware = require('./middleware/authMiddleware');
 const Message = require('./models/Message'); // Import the Message model
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 
+require('dotenv').config();
 
 dotenv.config();  // Load environment variables
 
@@ -23,6 +25,10 @@ const app = express();
 
 // Connect to MongoDB
 connectDB();
+
+
+
+
 
 // Middleware setup
 app.use(express.json());  // Parse JSON bodies
@@ -112,9 +118,26 @@ app.use('/api/messages', messageRoutes);
 });
 
 
+// ✅ Serve uploads folder
+// Example Multer configuration
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const { moduleId, dayIndex } = req.body;
+    const folderPath = path.join(__dirname, 'uploads', moduleId, `Day-${dayIndex}`);
+
+    fs.mkdirSync(folderPath, { recursive: true });
+    cb(null, folderPath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname); // or use Date.now() + path.extname(file.originalname)
+  },
+});
+
 
 // Serve uploaded files from the "uploads" folder
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 
 app.get('/api/view-file/:moduleId/:dayIndex', async (req, res) => {
@@ -162,7 +185,39 @@ app.get('/api/view-file/:moduleId/:dayIndex', async (req, res) => {
 });
 
 
+// Add route in your Express app
+app.get('/api/file-info/:moduleId/:dayIndex', async (req, res) => {
+  const { moduleId, dayIndex } = req.params;
 
+  try {
+    // Wait for async DB operation
+    const fileRecord = await Data.findOne({ moduleId, dayIndex });
+
+    if (!fileRecord) {
+      return res.status(404).json({ message: 'File not found in database' });
+    }
+
+    const fileUrl = fileRecord.fileUrl; // e.g., "uploads/747317/Day-1/abc.jpg"
+    const filePath = path.join(__dirname, fileUrl);
+
+    // Check if the file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File does not exist on server' });
+    }
+
+    const fileType = mime.lookup(filePath);
+    const fileName = path.basename(filePath); // Extract just the file name
+
+    if (!fileType) {
+      return res.status(400).json({ error: 'Unsupported file type' });
+    }
+
+    return res.json({ fileName, fileType, fileUrl });
+  } catch (err) {
+    console.error('Error fetching file info:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 

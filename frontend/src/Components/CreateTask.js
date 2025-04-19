@@ -15,11 +15,12 @@ const CreateTask = () => {
     const [fileName, setFileName] = useState('');
     const [teamMembers, setTeamMembers] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
     const token = localStorage.getItem('userToken');
-
+    
     useEffect(() => {
         const teamId = localStorage.getItem('team_id');
         
@@ -70,13 +71,16 @@ const CreateTask = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+            // Extract selected members with both name and email
+        const selectedMembers = teamMembers.filter(member => assignEmail.includes(member.email));
         const formData = new FormData();
         formData.append('taskName', taskName);
         formData.append('assignEmail', JSON.stringify(assignEmail)); // send as array
         formData.append('startDate', startDate);
         formData.append('endDate', endDate);
         formData.append('moduleSummury', moduleSummury);
+        formData.append('assignedMembers', JSON.stringify(selectedMembers)); // send names too
+
         if (taskFile) {
             formData.append('taskFile', taskFile);
         }
@@ -93,6 +97,8 @@ const CreateTask = () => {
             navigate(-1);
         } catch (error) {
             console.error('Error creating task:', error.response ? error.response.data : error.message);
+        } finally {
+          setLoading(false);
         }
     };
 
@@ -137,7 +143,7 @@ const CreateTask = () => {
                   <thead>
                     <tr>
                       <th scope="col" className="text-center"><p>Select</p></th>
-                      <th scope="col"><p> informations</p></th>
+                      <th scope="col"><p> Teammates</p></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -174,14 +180,21 @@ const CreateTask = () => {
                 </table>
               </div>
 
-
+                <label>(Optional)</label>
                 <textarea type="text" className='textarea' placeholder="Tag Any information   or message to your temmates.." value={moduleSummury} onChange={(e) => setModuleId(e.target.value)}  
                  style={{width:'100%',maxHeight: '150px',overflowY: 'scroll', marginTop:'4px',borderRadius:'0.5rem',border:'none'}} />
 
                 <center>
                     <div className="button-group">
                         <button type="button" className="back-btn m-4 bg-warning px-3" onClick={() => navigate(-1)}>Cancel</button>
-                        <button type="submit" className="submit-btn px-2 mt-4 my-4">Create Task</button>
+                        <button type="submit" className={`submit-btn px-2 mt-4 my-4 flex items-center justify-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={loading}
+                        >
+                          {loading ? (
+                            <span className="loader mr-2"></span>
+                          ) : null}
+                          {loading ? 'Creating...' : 'Create Task'}
+                        </button>
+
                     </div>
                 </center>
             </form>

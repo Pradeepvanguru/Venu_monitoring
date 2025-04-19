@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { message, notification } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaEye, FaLink, FaPaperPlane, FaTrash } from 'react-icons/fa'; 
+import { FaDownload, FaEye, FaLink, FaPaperPlane, FaTrash } from 'react-icons/fa'; 
 
 const TaskModules = () => {
   const navigate = useNavigate();
@@ -57,17 +57,49 @@ const TaskModules = () => {
     }
   };
 
-  // const handleClearAll = async () => {
-  //   if (window.confirm('Are you sure you want to delete all data?')) {
-  //     try {
-  //       await axios.delete(`${process.env.REACT_APP_URL}/api/clear-data`);
-  //       notification.success({ message: 'All data cleared!' });
-  //     } catch (err) {
-  //       console.error(err);
-  //       alert('Error clearing data');
-  //     }
-  //   }
-  // };
+  const handleview = () => {
+    if (!task?.taskFile) {
+      notification.info({ message: 'No file to view.' });
+      return;
+    }
+    const fileUrl = `${process.env.REACT_APP_URL}/${task.taskFile}`;
+    window.open(fileUrl, '_blank');
+  };
+  
+  const handleDownload = async () => {
+    if (!task?.taskFile) {
+      notification.info({ message: 'No file to download.' });
+      return;
+    }
+  
+    const fileUrl = `${process.env.REACT_APP_URL}/${task.taskFile}`;
+    const fileName = task.taskFile.split('/').pop();
+  
+    try {
+      const response = await fetch(fileUrl, {
+        method: 'GET',
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch file.');
+      }
+  
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName || 'file');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      notification.error({ message: 'Download failed. Please try again.' });
+    }
+  };
+  
+
 
   const handlerefresh = () => {
     window.location.reload();
@@ -128,7 +160,9 @@ const TaskModules = () => {
           <div>
           <strong className="text-dark">Module ID: <>{task.moduleId}</></strong><br></br>
           <strong className="text-primary">Start Date: <>{start}</></strong><br></br>
-          <strong className="text-danger">End Date: <>{end}</></strong>
+          <strong className="text-danger">End Date: <>{end}</></strong><br></br>
+          <strong className="text-dark ">Project Documents:  <><FaEye  onClick={()=>{handleview()}}/> <FaDownload onClick={()=>{handleDownload()}} /></></strong><br></br>
+          <p><i>No matter how big or small the task, every step forward brings you closer to your goals. Stay focused, believe in your abilities, and keep pushing forward. Progress is built through consistency and determination. You’ve got the strength within you to finish strong—just take it one task at a time.</i></p>
           </div>
         </div>
 
@@ -168,7 +202,7 @@ const TaskModules = () => {
                     <td>
                       {isSubmitted ? (
                         <button className="employee-task-view-btn" onClick={() => navigate('/file-modules')}> <FaEye size={17} color="#ffff" title="View File" /></button>
-                      ) : 'No data'}
+                      ) : 'Empty'}
                     </td>
                     <td>
                       <label htmlFor={`file-input-Day-${index + 1}`} className={`employee-task-upload-label ${(isSubmitted && !isRejected) ? 'employee-task-disabled-label' : ''}`}><FaLink size={17} color="#1313g" title="uploads"/></label>
@@ -183,10 +217,17 @@ const TaskModules = () => {
                         onClick={() => handleSubmission(index + 1)}
                         disabled={isSubmitted && !isRejected}
                       >
-                        {(isSubmitted && !isRejected) ? '☑️' : <strong className="text-info"><u>Submit</u></strong>}
+                        {(isSubmitted && !isRejected) ? '✅' : <strong className="text-info"><u>Submit</u></strong>}
                       </button>
                     </td>
-                    <td>{isRejected ? 'Reuploaded - Pending' : submission?.action || "Pending"}</td>
+                    <td>
+                    <p style={{
+                      color:isRejected? 'orange': submission?.action === 'accept'? 'green': submission?.action === 'reject'? 'red': 'black'
+                    }}>
+                      {isRejected ? 'Reuploaded - Pending': submission?.action? submission.action.charAt(0).toUpperCase() + submission.action.slice(1): 'Pending'}
+                    </p>
+                  </td>
+
                     <td>
                     {isSubmitted && (
                       <button

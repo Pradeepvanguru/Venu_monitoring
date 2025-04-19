@@ -20,6 +20,7 @@ import { notification } from 'antd';
 import useSessionManagement from './sessionExpiry';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import FilePreview from './Components/FilePreview';
 
 
 
@@ -69,6 +70,8 @@ const App = () => {
                 <Route path="/task-modules/:moduleId" element={<TaskModules />} />
                 <Route path='/profile' element={<Profile />}/>
                 <Route path='/forgot' element={<ForgotPassword />} />
+                
+                <Route path="/file-preview/:moduleId/:dayIndex" element={<FilePreview />} />
                 {/* <Route path="/deadlines" element={<Deadlines />} /> */}
                 <Route path="/queries" element={<ChatPage />} />
                 {/* Specific route for employee task by moduleId */}
