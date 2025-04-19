@@ -71,6 +71,7 @@ const CreateTask = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
             // Extract selected members with both name and email
         const selectedMembers = teamMembers.filter(member => assignEmail.includes(member.email));
         const formData = new FormData();
@@ -187,13 +188,18 @@ const CreateTask = () => {
                 <center>
                     <div className="button-group">
                         <button type="button" className="back-btn m-4 bg-warning px-3" onClick={() => navigate(-1)}>Cancel</button>
-                        <button type="submit" className={`submit-btn px-2 mt-4 my-4 flex items-center justify-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={loading}
-                        >
+                        <button
+                          type="submit"
+                          className={`submit-btn px-2 mt-4 my-4 flex items-center justify-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          disabled={loading}>
                           {loading ? (
-                            <span className="loader mr-2"></span>
-                          ) : null}
-                          {loading ? 'Creating...' : 'Create Task'}
+                            <div className="d-flex align-items-center">
+                              <strong role="status" className="me-2">Loading...</strong>
+                              <div className="spinner-border ms-auto" aria-hidden="true"></div>
+                            </div>
+                          ) : 'Create Task'}
                         </button>
+
 
                     </div>
                 </center>

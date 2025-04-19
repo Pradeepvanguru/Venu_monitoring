@@ -7,6 +7,8 @@ import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { notification } from 'antd';
+import { FaTrash } from 'react-icons/fa';
+import { Tooltip } from 'react-tooltip';
 
 
 const EmployeeDashboard = () => {
@@ -88,6 +90,29 @@ const EmployeeDashboard = () => {
     const handleTaskClick = (moduleId) => {
         navigate(`/task-modules/${moduleId}`); // Redirects to TaskModules page
     };
+ 
+     const TaskName = ({ taskName }) => {
+              const [showFull, setShowFull] = useState(false);
+              const capitalize = (text) =>
+                text
+                  .split(' ')
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ');
+            
+            
+              const words = taskName.split(' ');
+              const isLong = words.length > 8;
+              const fullText = capitalize(taskName);
+              const shortText = words.slice(0, 8).join(' ') + '... >';
+              const short=capitalize(shortText)
+            
+              return (
+                <h6  onClick={() => setShowFull(!showFull)} style={{ cursor: 'pointer', color: 'rgba(207, 207, 191, 0.96), rgba(179, 179, 98, 0.96)' }}>
+                  <strong>Task:</strong> {isLong && !showFull ? short : fullText}
+                </h6>
+              );
+            };
+
 
     return (
         <div className="employee-dashboard">
@@ -100,7 +125,7 @@ const EmployeeDashboard = () => {
       
           {error && <div className="alert alert-danger">{error}</div>}
       
-          <div className="employee-dashboard__todo-list">
+          <div className="employee-dashboard__todo-list" style={{fontSize:'10px'}}>
             {tasks.length > 0 ? (
               <ul className="employee-dashboard__task-list">
                 {tasks.map((task) => {
@@ -109,14 +134,35 @@ const EmployeeDashboard = () => {
                   const formattedEndDate = format(new Date(task.endDate), 'dd MMM yyyy');
       
                   return (
-                    <li
+                    <ul
                       key={task._id}
                       className="employee-dashboard__task-item"
-                      onClick={() => handleTaskClick(task.moduleId)}
+                     
+                      
                     >
                       <div className="employee-dashboard__task-card">
                         <div className="employee-dashboard__task-details">
-                          <h3 className="employee-dashboard__task-name">{task.taskName}</h3>
+                        <div className="employee-dashboard__task-edit">
+                        <button
+                            className="btn btn-outline-secondary "
+                            onClick={() => handleTaskClick(task.moduleId)} style={{color:'#ff9133'}}
+                          >
+                          Click to Open 
+                          </button>
+                          <button
+                            onClick={() => handleDelete(task._id)}
+                            disabled={progress !== 100}
+                            
+                            className="Delete btn btn-outline-secondary"
+                          >
+                            <FaTrash />
+                          </button>
+                         
+                        </div>
+                        <h3 className="employee-dashboard__task-name">
+                        <TaskName taskName={task.taskName} />
+                      </h3>
+
                           <p><strong>Module ID:</strong> {task.moduleId}</p>
                           <p><strong>Your Email:</strong> {task.assignEmail}</p>
                           <p><strong>Start Date:</strong> {formattedStartDate}</p>
@@ -126,25 +172,9 @@ const EmployeeDashboard = () => {
                           <p><b>Task Progress:</b></p>
                           <BootstrapProgressBar now={progress} label={`${Math.round(progress)}%`} />
                         </div>
-                        <div className="employee-dashboard__task-delete">
-                          <button
-                            onClick={() => handleDelete(task._id)}
-                            disabled={progress !== 100}
-                            className="btn btn-danger"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                        <div className="employee-dashboard__task-action">
-                          <button
-                            className="btn bg-warning text-dark"
-                            onClick={() => handleTaskClick(task.moduleId)}
-                          >
-                            Open &gt;
-                          </button>
-                        </div>
+                       
                       </div>
-                    </li>
+                    </ul>
                   );
                 })}
               </ul>
@@ -156,9 +186,10 @@ const EmployeeDashboard = () => {
             )}
           </div>
         </div>
+        <Tooltip anchorSelect='.delete' place='left'>complete all tasks</Tooltip>
       <style>
         {
-          `/* Employee Dashboard container */
+          `/* Main dashboard layout */
 .employee-dashboard {
     display: flex;
     background-color: #ffffff;
@@ -167,9 +198,10 @@ const EmployeeDashboard = () => {
     width: 100%;
     position: relative;
     height: 100vh;
+    font-size: 10px;
 }
 
-/* Content wrapper */
+/* Content area */
 .employee-dashboard__content-wrapper {
     margin-left: 280px;
     padding: 20px;
@@ -177,14 +209,13 @@ const EmployeeDashboard = () => {
     background-color: #2a2e35;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    position: relative;
     overflow-y: auto;
 }
 .employee-dashboard__content-wrapper::-webkit-scrollbar {
     display: none;
 }
 
-/* Refresh button */
+/* Refresh Button */
 .employee-dashboard__refresh-btn {
     float: right;
     background-color: #1326cc5d;
@@ -195,115 +226,105 @@ const EmployeeDashboard = () => {
     font-weight: 500;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background-color 0.3s ease;
-    border-bottom: 1px solid #fff;
+    border: none;
 }
 .employee-dashboard__refresh-btn:hover {
     background-color: #423ce575;
 }
 
-/* Module heading */
+/* Heading */
 .employee-dashboard__module-heading {
     color: #eaeaea;
     border-bottom: 3px solid #ff6347;
     padding-bottom: 10px;
-    font-size: 1.6rem;
+    font-size: 1rem;
     font-weight: bold;
     margin-bottom: 30px;
+    
 }
 
-/* Task list */
+/* Task list wrapper */
 .employee-dashboard__todo-list {
     padding: 20px;
     width: 100%;
-    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
-/* Individual task item */
+/* Task item as card */
 .employee-dashboard__task-item {
     background-color: #3a3e45;
-    margin-bottom: 20px;
-    border: none;
     border-radius: 10px;
-    height: 270px;
+    width: 100%;
+    max-width: 820px;
+    min-width: 780px;
+    flex: 1 1 auto;
     box-shadow: 0 3px 6px rgba(233, 250, 2, 0.25);
     transition: transform 0.3s ease, background-color 0.3s ease;
+    list-style: none;
+    padding: 15px;
+    margin-bottom:20px;
+   
 }
 .employee-dashboard__task-item:hover {
     background-color: #4c2f52;
     transform: scale(1.02);
 }
 
-/* Task card */
+/* Card content */
 .employee-dashboard__task-card {
+   margin-bottom:10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding: 20px;
-    border-radius: 10px;
-}
-
-/* Task progress */
-.employee-dashboard__task-progress {
-    margin-bottom: 20px;
-    color: white;
-}
-.employee-dashboard__task-progress p {
-    color: white;
+    gap: 12px;
+    height: 100%;
 }
 
 /* Task details */
 .employee-dashboard__task-details {
-    flex: 1;
-    padding-bottom: 20px;
+    color: #f2f0ee;
+    font-size: 0.75rem;
+    font-weight: bold;
 }
-
-/* Task name */
 .employee-dashboard__task-name {
     color: #ffdf5d;
-    font-weight: bold;
-    margin-bottom: 8px;
-    font-size: 1.5rem;
-    margin-left: 350px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-/* Module ID and email/date styling */
-.employee-dashboard__task-details p {
-    color: #f2f0ee;
-    font-weight: bold;
-    margin-bottom: 8px;
     font-size: 1rem;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+    margin-bottom: 8px;
 }
-.employee-dashboard__task-details strong {
+.employee-dashboard__task-details p {
+    margin: 2px 0;
+}
+
+/* Progress section */
+.employee-dashboard__task-progress p {
     color: white;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
-/* Delete button container */
-.employee-dashboard__task-delete {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding-top: 10px;
-    margin-top: -260px;
-}
-
-/* Action button container (Open) */
-.employee-dashboard__task-action {
+.employee-dashboard__task-edit {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 10px;
 }
+\end{code}
 
-/* Disabled buttons */
+/* Open button */
+.employee-dashboard__task-action {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Disable button styling */
 button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
 
-/* No tasks */
+/* No task fallback */
 .employee-dashboard__no-tasks {
     text-align: center;
     font-size: 1.2rem;
@@ -312,6 +333,7 @@ button:disabled {
     margin-top: 40px;
     font-style: italic;
 }
+
 `
         }
       </style>

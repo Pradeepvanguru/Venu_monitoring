@@ -110,6 +110,28 @@ const TeamLeadInterface = () => {
         fetchTasks();
     };
 
+    const TaskName = ({ taskName }) => {
+        const [showFull, setShowFull] = useState(false);
+        const capitalize = (text) =>
+            text
+              .split(' ')
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+        
+      
+        const words = taskName.split(' ');
+        const isLong = words.length > 8;
+        const fullText = capitalize(taskName);
+        const shortText = words.slice(0, 8).join(' ') + '... >';
+        const short=capitalize(shortText)
+      
+        return (
+          <h6 className='' onClick={() => setShowFull(!showFull)} style={{ cursor: 'pointer',fontSize:'15px',color: 'rgb(4, 88, 172), rgba(8, 106, 171, 0.96)' }}>
+            <strong>Task:</strong> {isLong && !showFull ? short : fullText}
+          </h6> 
+        );
+      };
+
     return (
         <div className="team-lead-interface">
             <Sidebar />
@@ -159,10 +181,12 @@ const TeamLeadInterface = () => {
                                 <div className="d-flex justify-content-between align-items-start py-4 ">
                     
                                     <div className="task-info">
-                                    <button className='btn btn-outline-primary text-dark'    onClick={() => handleClickCard(task)}  style={{float:'right',padding:'5px',margin:'30px'}}>Check Daily Work</button>
-                                    <center className='fs-6'> <p><strong>Task:</strong> {task.taskName}</p></center>
+                                    <button className='btn btn-outline-primary text-dark' onClick={() => handleClickCard(task)}  style={{float:'right',padding:'5px',margin:'30px',fontSize:'12px'}}>Check Daily Work</button>
+                                    
                                         <div className="d-flex align-items-center mx-2">
                                             <span className="task-dates" >
+                                            <TaskName taskName={task.taskName} />
+
                                            <strong className='text-secondary'> <h6>Name: {task.assignName}</h6></strong>
                                            
                                                 {start} → {end}
@@ -170,7 +194,7 @@ const TeamLeadInterface = () => {
                                         </div>
                                         <div style={{ fontSize: '10px', marginTop: '5px',width:'75%',border:'1px solid rgba(7, 45, 142, 0.93)' ,borderRadius:'1rem'}}>
                                             <BootstrapProgressBar
-                                                now={progress}
+                                                now={progress===0?<p className='px-2'>0%</p>:progress}
                                                 label={`${Math.round(progress)}%`}
                                                 style={{ height: '10px' }}
                                             />
@@ -194,8 +218,8 @@ const TeamLeadInterface = () => {
                                 </div>
                                 {isExpanded && (
                                     <div className="extra-details mt-2" style={{ fontSize: '10px' }}>
-                                        <p><strong>Module:</strong> {task.moduleId}</p>
-                                        <p><strong>Assigned To:</strong> {task.assignEmail}</p>
+                                        <p><strong>Module ID :</strong> {task.moduleId}</p>
+                                        <p><strong>Email :</strong> {task.assignEmail}</p>
                                     </div>
                                 )}
                             </li>

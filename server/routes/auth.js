@@ -71,6 +71,7 @@ router.get('/api/profile', authMiddleware, async (req, res) => {
 
         // Construct the full URL
         const profileUrl = `${req.protocol}://${req.get('host')}/${user.profilePhoto}`;
+        console.log(profileUrl,"urn")
 
         res.json({ ...user._doc, profilePhoto: profileUrl });
     } catch (error) {

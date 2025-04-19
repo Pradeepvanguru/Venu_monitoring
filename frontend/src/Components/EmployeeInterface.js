@@ -146,6 +146,29 @@ const TaskModules = () => {
   const start = format(new Date(task.startDate), 'dd MMM yyyy');
   const end = format(new Date(task.endDate), 'dd MMM yyyy');
 
+
+   const TaskName = ({ taskName }) => {
+          const [showFull, setShowFull] = useState(false);
+          const capitalize = (text) =>
+            text
+              .split(' ')
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+        
+        
+          const words = taskName.split(' ');
+          const isLong = words.length > 8;
+          const fullText = capitalize(taskName);
+          const shortText = words.slice(0, 8).join(' ') + '... >';
+          const short=capitalize(shortText)
+        
+          return (
+            <h6  onClick={() => setShowFull(!showFull)} style={{ cursor: 'pointer', color: 'rgba(28, 28, 23, 0.96), rgba(179, 179, 98, 0.96)' }}>
+              <strong>Task:</strong> {isLong && !showFull ? short : fullText}
+            </h6>
+          );
+        };
+
   return (
     <div className="employee-task-page-container">
       <div className="employee-task-sidebar">
@@ -155,9 +178,9 @@ const TaskModules = () => {
       <div className="employee-task-module-container">
         <div className="employee-task-box container">
           <center>
-            <strong className="text-dark fs-4">{task.taskName}</strong>
+          <TaskName taskName={task.taskName} />
           </center>
-          <div>
+          <div style={{fontSize:'12px'}}>
           <strong className="text-dark">Module ID: <>{task.moduleId}</></strong><br></br>
           <strong className="text-primary">Start Date: <>{start}</></strong><br></br>
           <strong className="text-danger">End Date: <>{end}</></strong><br></br>
@@ -174,7 +197,7 @@ const TaskModules = () => {
           <button className="employee-task-refresh btn btn-info text-dark border-1 mx-1 p-2 my-2" style={{ float: 'right' }} onClick={handlerefresh}>Refresh</button>
           {/* <button onClick={handleClearAll} className="employee-task-clear btn btn-danger mb-2">Clear All Data</button> */}
 
-          <table className="employee-task-table">
+          <table className="employee-task-table" style={{fontSize:'10px'}}>
             <thead>
               <tr>
                 <th>Day No.</th>

@@ -30,24 +30,37 @@ router.get('/files/:filename', (req, res) => {
     });
 });
 
-// ✅ Get chat list (employees for team leaders, vice versa)
-router.get('/chat-list',authMiddleware, async (req, res) => {
-    const {team_id,email}=req.query;
+router.get('/chat-list', authMiddleware, async (req, res) => {
+    const { team_id, email } = req.query;
+
     try {
-        const users = await User.find({ team_id , email: { $ne: email },_id:{$ne:req.user.id}});
-        // console.log("id:",team_id,req.user.id)
-        // console.log("Chat_Names:",email)
+        const users = await User.find({
+            team_id,
+            email: { $ne: email },
+            _id: { $ne: req.user.id }
+        }).select('name role email profilePhoto'); // Select only required fields
 
         if (!users.length) {
             return res.status(403).json({ error: 'No users found' });
         }
-        
-        res.json(users);
+
+        const formattedUsers = users.map(user => ({
+            _id: user._id,
+            name: user.name,
+            role: user.role,
+            email: user.email,
+            profilePhoto: user.profilePhoto 
+                ? `${req.protocol}://${req.get('host')}/${user.profilePhoto}`
+                : null // or default image URL
+        }));
+
+        res.json(formattedUsers);
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 // ✅ Get chat messages between two users
 router.get('/messages/:userId', authMiddleware, async (req, res) => {

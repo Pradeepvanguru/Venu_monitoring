@@ -81,7 +81,7 @@ const TaskProgressBar = ({ moduleID }) => {
   }
 
   return (
-    <div className="progress-bar-container">
+    <div className="progress-bar-container" style={{fontSize:'10px'}}>
       {taskData ? (
         <div>
           <p>Days: {daysSubmitted}/{totalDays}</p>

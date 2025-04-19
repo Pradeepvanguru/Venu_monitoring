@@ -257,26 +257,55 @@ const filteredUsers = users.filter(user =>
   </div>
 
   {filteredUsers.length > 0 ? (
-    filteredUsers.map((user) => (
-      <div
-        key={user._id}
-        className="user-item"
-        onClick={() => setSelectedUser(user)}
-      >
-        <FaUser className="user-icon" /> {user.name} ({user.role})
-      </div>
-    ))
-  ) : (
-    <center className="text-secondary m-5 shadow-sm">
-      <i>No Teammates are found...!</i>
-    </center>
-  )}
+  filteredUsers.map((user) => (
+    <div
+      key={user._id}
+      className="user-item d-flex align-items-center gap-2"
+      onClick={() => setSelectedUser(user)}
+    >
+      {user.profilePhoto ? (
+        <img 
+          src={user.profilePhoto}
+          alt={`${user.name}'s profile`} 
+          className="rounded-circle" 
+          style={{ width: '32px', height: '32px', objectFit: 'cover', border: '1px solid black' }} 
+        />
+      ) : (
+        <div 
+          className="rounded-circle d-flex justify-content-center align-items-center bg-light"
+          style={{ width: '32px', height: '32px', border: '1px solid black' }}
+        >
+          <FaUser size={18} />
+        </div>
+      )}
+      <span>{user.name} ({user.role})</span>
+    </div>
+  ))
+) : (
+  <center className="text-secondary m-5 shadow-sm">
+    <i>No Teammates are found...!</i>
+  </center>
+)}
+
+
+
 </div>
 
             <div className="chat-box"> 
-             <div className="chat-header p-3 bg-black m-1 rounded text-white  ">
-            <FaUser className="user-icon mx-2" />{selectedUser ? ` ${userName}` : "No user"}
+            <div className="chat-header p-3 bg-black m-1 rounded text-white d-flex align-items-center gap-2">
+            {selectedUser && selectedUser.profilePhoto ? (
+                <img 
+                src={selectedUser.profilePhoto}
+                alt={`${userName}'s profile`} 
+                className="rounded-circle"
+                style={{ width: '32px', height: '32px', objectFit: 'cover', border: '1px solid white' }}
+                />
+            ) : (
+                <FaUser className="user-icon mx-1" size={20} />
+            )}
+            {selectedUser ? userName : "No user"}
             </div>
+
     
             {/* <div className="messages">
             <center className='text-secondary'><i>Your messages are end-to-end encrypted🔒...!</i></center><br></br>
@@ -339,6 +368,17 @@ const filteredUsers = users.filter(user =>
 
          <Tooltip anchorSelect='.file-upload-icon' place='top'>Attach file here..!</Tooltip>
         <style>{`
+
+                .user-item {
+                padding: 10px;
+                cursor: pointer;
+                border-bottom: 1px solid #ddd;
+                }
+
+                .user-item:hover {
+                background-color: #f0f0f0;
+                }
+
             .chat-container {
                 display: flex;
                 height: 100vh;

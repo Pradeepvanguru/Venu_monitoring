@@ -186,21 +186,34 @@ router.post('/tasks', authMiddleware, upload.single('taskFile'), async (req, res
 
 
 // Get logged-in user's details
-router.get('/logged-user',authMiddleware, async (req, res) => {
+router.get('/logged-user', authMiddleware, async (req, res) => {
   try {
-      const userId = req.user.id; // Extract user ID from the token
-      const user = await User.findById(userId).select('name email'); // Fetch name & email
+    const userId = req.user?.id; // Safe access to user ID
+    if (!userId) {
+      return res.status(400).json({ error: 'Invalid token or user ID not found' });
+    }
 
-      if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-      }
+    const user = await User.findById(userId).select('name email profilePhoto');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-      res.json({ name: user.name, email: user.email });
+    // Build profile photo URL if it exists, otherwise set to null or default
+    const profileUrl = user.profilePhoto? `${req.protocol}://${req.get('host')}/${user.profilePhoto}`: null;
+
+    // console.log('Profile URL:', profileUrl);
+
+    res.json({
+      name: user.name,
+      email: user.email,
+      profilePhoto: profileUrl,
+    });
   } catch (error) {
-      console.error('Error fetching user:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching logged-in user:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 // Fetch task based on email (assignEmail in the database)

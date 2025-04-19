@@ -169,7 +169,7 @@ const FileModules = () => {
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
-        notification.info({ message: 'Failed to download file.' });
+        notification.success({ message: 'Failed to download file.' });
       }
     } catch (error) {
       notification.error({ message: `Error downloading file: ${error.message}` });
