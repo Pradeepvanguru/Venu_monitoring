@@ -1,3 +1,8 @@
+import { FiDatabase } from "react-icons/fi"; 
+import { CgProfile } from "react-icons/cg"; 
+import { HiOutlineChatAlt2 } from "react-icons/hi"; 
+import { MdOutlineLogout } from "react-icons/md"; 
+import { FcHome } from "react-icons/fc"; 
 import React,{ useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './EmployeeSidebar.css';
@@ -43,9 +48,17 @@ const EmployeeSidebar = () => {
         // window.location.reload();
     };
 
+    
+    
+
     return (
+       
+        
+        
         <aside className="employee-sidebar">
+             
             <div className="sidebar-header">
+            
                 <h2>Teammate Panel</h2>
                 <div className="d-flex align-items-center justify-content-center mt-3">
                     <img
@@ -65,11 +78,11 @@ const EmployeeSidebar = () => {
                 </div>
             </div>
             <nav className="sidebar-nav">
-                <Link to="/employee-dashboard" onClick={handlerefresh}>Dashboard</Link>
-                <Link to="/profile" className="dropdown-item">Profile &gt;</Link>
-                 <Link to="/queries">Team Chats &gt;</Link>
-                 <Link to="/file-modules">File Modules &gt;</Link>
-                <button className="logout-btn" onClick={handleLogout}>Logout</button>
+                <Link to="/employee-dashboard" onClick={handlerefresh}> <FcHome fontSize={20} /> Dashboard</Link>
+                <Link to="/profile" className="dropdown-item"><CgProfile fontSize={20}/> Profile </Link>
+                 <Link to="/queries"> <HiOutlineChatAlt2 fontSize={20} /> Team Chats </Link>
+                 <Link to="/file-modules"><FiDatabase fontSize={20}/> Tasks Data </Link>
+                <button className="logout-btn" onClick={handleLogout}><MdOutlineLogout fontSize={20} /> Logout</button>
             </nav>
         </aside>
     );

@@ -1,3 +1,5 @@
+import { MdOpenInNew } from "react-icons/md"; 
+import { HiRefresh } from "react-icons/hi"; 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -138,7 +140,7 @@ const TeamLeadInterface = () => {
             <div className="content-wrapper">
             <h2 className="module-heading">Tasks</h2>
             <button onClick={handleRefresh} className="btn btn-success refresh-btn mt-0">
-                    Refresh 🔃
+                    Refresh <HiRefresh />
                 </button>
                 <div>
                 <input
@@ -181,7 +183,7 @@ const TeamLeadInterface = () => {
                                 <div className="d-flex justify-content-between align-items-start py-4 ">
                     
                                     <div className="task-info">
-                                    <button className='btn btn-outline-primary text-dark' onClick={() => handleClickCard(task)}  style={{float:'right',padding:'5px',margin:'30px',fontSize:'12px'}}>Check Daily Work</button>
+                                    <button className='btn btn-outline-warning text-danger' onClick={() => handleClickCard(task)}  style={{float:'right',padding:'5px',margin:'30px',fontSize:'12px',fontWeight:'500'}}>Work Update <MdOpenInNew /></button>
                                     
                                         <div className="d-flex align-items-center mx-2">
                                             <span className="task-dates" >
@@ -189,10 +191,10 @@ const TeamLeadInterface = () => {
 
                                            <strong className='text-secondary'> <h6>Name: {task.assignName}</h6></strong>
                                            
-                                                {start} → {end}
+                                               <p className="text-danger" style={{fontSize:'12px' }}> {start} → {end}</p>
                                             </span>
                                         </div>
-                                        <div style={{ fontSize: '10px', marginTop: '5px',width:'75%',border:'1px solid rgba(7, 45, 142, 0.93)' ,borderRadius:'1rem'}}>
+                                        <div className="mx-2" style={{ fontSize: '10px', marginTop: '5px',width:'75%',border:'1px solid rgba(7, 45, 142, 0.93)' ,borderRadius:'1rem'}}>
                                             <BootstrapProgressBar
                                                 now={progress===0?<p className='px-2'>0%</p>:progress}
                                                 label={`${Math.round(progress)}%`}
@@ -217,7 +219,7 @@ const TeamLeadInterface = () => {
 
                                 </div>
                                 {isExpanded && (
-                                    <div className="extra-details mt-2" style={{ fontSize: '10px' }}>
+                                    <div className="extra-details px-2" style={{ fontSize: '10px' }}>
                                         <p><strong>Module ID :</strong> {task.moduleId}</p>
                                         <p><strong>Email :</strong> {task.assignEmail}</p>
                                     </div>

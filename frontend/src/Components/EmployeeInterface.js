@@ -119,7 +119,7 @@ const TaskModules = () => {
   const totalPages = Math.ceil(totalDays / recordsPerPage);
 
   const handleDelete = async (dayIndex) => {
-    if (window.confirm('Are you sure you want to delete this entry?')) {
+    if (window.confirm('Are you sure you want to delete?')) {
       try {
         const assignEmail = task?.assignEmail;
         if (!assignEmail) {
@@ -170,7 +170,7 @@ const TaskModules = () => {
         };
 
   return (
-    <div className="employee-task-page-container">
+    <div className="employee-task-page-container ">
       <div className="employee-task-sidebar">
         <EmployeeSidebar />
       </div>

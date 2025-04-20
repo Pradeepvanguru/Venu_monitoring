@@ -420,7 +420,7 @@ router.delete('/delete-task', async (req, res) => {
       const filePath = path.join(__dirname,'..', fileName);
       fs.unlink(filePath, (err) => {
         if (err) {
-          console.error('Error deleting file:', err.message);
+          console.error('Error deleting one files:', err.message);
           // Don't return error here — file might already be gone
         }
       });
@@ -667,59 +667,61 @@ router.delete('/tasks/:taskId', async (req, res) => {
   const { taskId } = req.params;
 
   try {
-    // Step 1: Find the task (to access teamId and moduleId)
+    // Step 1: Find the task
     const task = await Task.findById(taskId);
-
     if (!task) {
       console.log("No task found with ID:", taskId);
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    const { teamId, moduleId } = task;
+    const { moduleId } = task;
+    const T_id = task.team_id;
 
-    if (!teamId || !moduleId) {
+    if (!T_id || !moduleId) {
       console.warn(`❗ Missing teamId or moduleId in task: ${taskId}`);
     }
 
     // Step 2: Delete the task
     const deletedTask = await Task.findByIdAndDelete(taskId);
-    console.log('✅ Deleted Task:', deletedTask);
+    console.log('✅ Deleted Task:');
 
-    // Step 3: Delete related Data if teamId and moduleId are available
-    if (teamId && moduleId) {
-      const dataDeleteResult = await Data.deleteMany({ teamId, moduleId });
-      console.log(`🗑️ Deleted ${dataDeleteResult.deletedCount} Data entries`);
+    // Step 3: Find related Data entries
+    const relatedData = await Data.find({moduleId });
 
-      // Remove submissions from other tasks
-      const submissionUpdateResult = await Task.updateMany(
-        {},
-        { $pull: { submissions: { teamId, moduleId } } }
-      );
-      console.log(`🔄 Updated ${submissionUpdateResult.modifiedCount} tasks to remove submissions`);
+    // Step 4: Delete associated uploaded files
+    relatedData.forEach(data => {
+      if (data.fileUrl) {
+        const filePath = path.join(__dirname, "..", data.fileUrl); // assuming filePath is like "uploads/filename.jpg"
+        console.log(filePath,"path")
+        fs.access(filePath, fs.constants.F_OK, (err) => {
+          if (!err) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error("❌ Error deleting file:", err);
+              } else {
+                console.log("✅ Deleted file:", filePath);
+              }
+            });
+          } else {
+            console.warn("⚠️ File does not exist:", filePath);
+          }
+        });
+      }
+    });
 
-      // Step 4: Delete related files from /uploads
-      const uploadDir = path.join(__dirname, '..', 'uploads');
-      const matchString = `${teamId}_${moduleId}`.replace(/[@.]/g, '_');
+    // Step 5: Delete Data entries by T_id and moduleId
+    const dataDeleteResult = await Data.deleteMany({ T_id, moduleId });
 
-      fs.readdir(uploadDir, (err, files) => {
-        if (err) {
-          console.error('⚠️ Error reading uploads directory:', err);
-        } else {
-          files.forEach(file => {
-            if (file.includes(matchString)) {
-              const filePath = path.join(uploadDir, file);
-              fs.unlink(filePath, err => {
-                if (err) {
-                  console.error(`❌ Error deleting file ${file}:`, err);
-                } else {
-                  console.log(`✅ Deleted file: ${file}`);
-                }
-              });
-            }
-          });
-        }
-      });
-    }
+    // Step 6: Also update submissions in all tasks
+    const submissionUpdateResult = await Task.updateMany(
+      {},
+      { $pull: { submissions: { T_id, moduleId } } }
+    );
+    console.log(`🔄 Updated ${submissionUpdateResult.modifiedCount} tasks to remove submissions`);
+
+    // Step 7: Optional cleanup by moduleId
+    const additionalDeletes = await Data.deleteMany({ moduleId });
+    console.log(`🧹 Additionally deleted ${additionalDeletes.deletedCount} entries with moduleId only`);
 
     // Final Response
     return res.status(200).json({
@@ -732,6 +734,8 @@ router.delete('/tasks/:taskId', async (req, res) => {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+
 
 
 
@@ -767,12 +771,18 @@ router.get('/datafetch/:email', authMiddleware, async (req, res) => {
   const loggedInUser = req.user;
   const { role, email: userEmail } = loggedInUser;
   const { email } = req.params;
+  const { moduleId } = req.query; // <-- moduleId from query
 
   try {
     let files = [];
     let newname = null;
+    let taskname=null;
 
     if (role === 'team-lead') {
+      const taskN= await Task.findOne({moduleId})
+      if(taskN){
+        taskname=taskN.taskName
+      }
       const teamLead = await User.findOne({ email });
       if (!teamLead) {
         return res.status(404).json({ message: 'Team not found for this team lead' });
@@ -789,10 +799,19 @@ router.get('/datafetch/:email', authMiddleware, async (req, res) => {
       });
 
       const teammateEmails = teammates.map(member => member.email);
-      files = await Data.find({ assignEmail: { $in: teammateEmails } });
+
+      files = await Data.find({assignEmail: { $in: teammateEmails },moduleId: moduleId });
 
     } else if (role === 'employee') {
-      files = await Data.find({ assignEmail: userEmail });
+
+      const taskN= await Task.findOne({moduleId})
+      if(taskN){
+        taskname=taskN.taskName
+      }
+      files = await Data.find({
+        assignEmail: userEmail,
+        moduleId: moduleId // filter by moduleId
+      });
     } else {
       return res.status(403).json({ message: 'Invalid role or not authorized' });
     }
@@ -801,13 +820,14 @@ router.get('/datafetch/:email', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'No data found here' });
     }
 
-    res.status(200).json({ success: true, files, newname });
+    res.status(200).json({ success: true, files, newname,taskname });
 
   } catch (error) {
     console.error('Error fetching data by role:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 
 

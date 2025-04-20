@@ -10,6 +10,10 @@ import {notification} from 'antd'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Tooltip } from 'react-tooltip';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+
 
 
 
@@ -26,6 +30,7 @@ const ChatPage = () => {
     const [files,setFile]=useState(null)
     const [fileName,setfileName]=useState(null)
     const [searchQuery, setSearchQuery] = useState("");
+
     // const intervalRef = useRef(null);
     // const timeoutRef = useRef(null);
 
@@ -219,7 +224,8 @@ const filteredUsers = users.filter(user =>
                     marginLeft:'-10px',
                     boxShadow:'-moz-initial'
                     
-                }}> &lt; Back</button>
+                }}><FontAwesomeIcon icon={faChevronLeft} /> Back
+                </button>
                 
                 <div className="user-list">
   <ToastContainer position="top-right" autoClose={3000} />

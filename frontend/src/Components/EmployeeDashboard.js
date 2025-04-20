@@ -1,3 +1,5 @@
+import { HiRefresh } from "react-icons/hi"; 
+import { FcRefresh } from "react-icons/fc"; 
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; // Import navigation hook
 import EmployeeSidebar from './EmployeeSidebar';
@@ -9,6 +11,11 @@ import axios from 'axios';
 import { notification } from 'antd';
 import { FaTrash } from 'react-icons/fa';
 import { Tooltip } from 'react-tooltip';
+
+import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+
 
 
 const EmployeeDashboard = () => {
@@ -103,7 +110,7 @@ const EmployeeDashboard = () => {
               const words = taskName.split(' ');
               const isLong = words.length > 8;
               const fullText = capitalize(taskName);
-              const shortText = words.slice(0, 8).join(' ') + '... >';
+              const shortText = words.slice(0, 8).join(' ') + '...>';
               const short=capitalize(shortText)
             
               return (
@@ -113,13 +120,18 @@ const EmployeeDashboard = () => {
               );
             };
 
+            const handleClickCard = (task) => {
+              localStorage.setItem('selectedTask',JSON.stringify(task));
+              // navigate('/file-modules'); // redirect
+          };
+
 
     return (
         <div className="employee-dashboard">
         <EmployeeSidebar />
         <div className="employee-dashboard__content-wrapper">
-          <button onClick={handleRefresh} className="btn boder-1 employee-dashboard__refresh-btn">
-            Refresh 🔃
+          <button onClick={handleRefresh} className="btn border-1 employee-dashboard__refresh-btn">
+            Refresh <HiRefresh />
           </button>
           <h2 className="employee-dashboard__module-heading">Task Modules</h2>
       
@@ -137,32 +149,34 @@ const EmployeeDashboard = () => {
                     <ul
                       key={task._id}
                       className="employee-dashboard__task-item"
+                      onClick={() => handleClickCard(task)} 
                      
                       
                     >
                       <div className="employee-dashboard__task-card">
                         <div className="employee-dashboard__task-details">
                         <div className="employee-dashboard__task-edit">
-                        <button
+                        <button 
                             className="btn btn-outline-secondary "
                             onClick={() => handleTaskClick(task.moduleId)} style={{color:'#ff9133'}}
                           >
-                          Click to Open 
+                           Open  <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+
                           </button>
-                          <button
-                            onClick={() => handleDelete(task._id)}
-                            disabled={progress !== 100}
-                            
-                            className="Delete btn btn-outline-secondary"
-                          >
+                          {progress === 100 && (
+                              <button
+                                onClick={() => handleDelete(task._id)}
+                                title="Delete After All Tasks are Done"
+                                className="btn btn-outline-secondary"
+                              >
                             <FaTrash />
                           </button>
-                         
+                          )}
                         </div>
                         <h3 className="employee-dashboard__task-name">
                         <TaskName taskName={task.taskName} />
                       </h3>
-
+                          <p className="text-secondary">Name :{task.assignName}</p>
                           <p><strong>Module ID:</strong> {task.moduleId}</p>
                           <p><strong>Your Email:</strong> {task.assignEmail}</p>
                           <p><strong>Start Date:</strong> {formattedStartDate}</p>
@@ -179,7 +193,7 @@ const EmployeeDashboard = () => {
                 })}
               </ul>
             ) : (
-              <div className="employee-dashboard__no-tasks">
+              <div className="employee-dashboard__no-tasks ">
                 <p>No tasks available</p>
                 <p>Overview of tasks, progress, and upcoming deadlines.</p>
               </div>
@@ -228,6 +242,11 @@ const EmployeeDashboard = () => {
     font-size: 0.9rem;
     border: none;
 }
+
+.employee-dashboard__no-tasks{
+
+margin:160px;
+}
 .employee-dashboard__refresh-btn:hover {
     background-color: #423ce575;
 }
@@ -263,7 +282,7 @@ const EmployeeDashboard = () => {
     box-shadow: 0 3px 6px rgba(233, 250, 2, 0.25);
     transition: transform 0.3s ease, background-color 0.3s ease;
     list-style: none;
-    padding: 15px;
+    padding: 25px;
     margin-bottom:20px;
    
 }

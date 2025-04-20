@@ -1,3 +1,8 @@
+import { MdLogout } from "react-icons/md"; 
+import { BiAddToQueue } from "react-icons/bi"; 
+import { SiLivechat } from "react-icons/si"; 
+import { CgProfile } from "react-icons/cg"; 
+import { FcHome } from "react-icons/fc"; 
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -64,11 +69,11 @@ const Sidebar = () => {
             </div>
 
             <nav className="sidebar-nav mt-4">
-                <Link to="/team-lead-interface" onClick={handlerefresh}>Dashboard &gt;</Link>
-                <Link to="/profile">Profile &gt;</Link>
-                <Link to="/queries">Team Chats &gt;</Link>
-                <Link to="/create-task">Create Task &gt;</Link>
-                <button className="logout-btn mt-3" onClick={handleLogout}>Logout</button>
+                <Link to="/team-lead-interface" onClick={handlerefresh}><FcHome fontSize={20} /> Dashboard </Link>
+                <Link to="/profile"> <CgProfile fontSize={20}/> Profile </Link>
+                <Link to="/queries"><SiLivechat fontSize={20} /> Team Chats </Link>
+                <Link to="/create-task"><BiAddToQueue fontSize={20} /> Create Task </Link>
+                <button className="logout-btn mt-3" onClick={handleLogout}><MdLogout  fontSize={20}/> Logout</button>
             </nav>
         </aside>
     );

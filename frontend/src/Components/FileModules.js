@@ -1,3 +1,6 @@
+import { AiOutlineCloudDownload } from "react-icons/ai"; 
+import { IoMdEye } from "react-icons/io"; 
+// all your imports stay the same
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
@@ -6,10 +9,10 @@ import './FileModules.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { notification } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
-
+// component starts
 const FileModules = () => {
- 
   const [moduleId, setModuleId] = useState('');
   const [files, setFiles] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
@@ -17,61 +20,59 @@ const FileModules = () => {
   const [showInput, setShowInput] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [previous, setPrevious] = useState('');
-  const [newname,setNewname]=useState('')
-  const [newId, setNewId] = useState('');
-  const [newemail,setEmail]=useState()
-
+  const [email, setEmail] = useState('');
+  const [newname, setNewname] = useState('');
+  const [newModuleId, setNewModuleId] = useState('');
+  const [taskName, setTaskName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const navigate = useNavigate();
 
   const token = localStorage.getItem('userToken');
   const role = localStorage.getItem('userRole');
   const loggedInUserEmail = localStorage.getItem('loggedInEmail');
   const selectedName = localStorage.getItem('userName');
   const selectedTask = JSON.parse(localStorage.getItem("selectedTask"));
-  
- 
+
+  // 🆕 Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const filesPerPage = 5; // change this to adjust how many items per page
 
   const handleAction = async (moduleId, dayIndex, action) => {
-    const email=newemail
+    const email = selectedUser?.email || newEmail;
     const selectedName = localStorage.getItem('userName');
     const teamleadEmail = localStorage.getItem('loggedInEmail');
     try {
       const res = await axios.post(`${process.env.REACT_APP_URL}/api/data/${moduleId}/${dayIndex}/${email}/action`, {
         action,
-        teammateEmail: email, // send teammate's email
+        teammateEmail: email,
         teammateName: selectedUser?.name || newname || selectedName,
         actionByName: selectedName,
-        actionByEmail:teamleadEmail
-        
+        actionByEmail: teamleadEmail
       });
-      console.log(email, selectedUser?.name ||newname || selectedName,"oooooo")
-      notification.info({message:""+res.data.message});
-      handlerefresh()
-      
-      // Optionally: Refresh your files or data state here
+      notification.success  ({ message: "" + res.data.message });
+      handlerefresh();
     } catch (error) {
       console.error('Action error:', error);
       alert('Failed to perform action');
     }
   };
-  
-
-  
 
   useEffect(() => {
     if (selectedTask?.assignEmail?.[0]) {
-      setNewId(selectedTask.assignEmail[0]);
+      setNewEmail(selectedTask.assignEmail[0]);
+      setNewModuleId(selectedTask.moduleId);
     }
   }, [selectedTask]);
 
-  const fetchFilesByEmail = async (email) => {
+  const fetchFilesByEmail = async (email, moduleId) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_URL}/api/datafetch/${email}`, {
+      const response = await axios.get(`${process.env.REACT_APP_URL}/api/datafetch/${email}?moduleId=${moduleId}`, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
       });
 
       const files = response?.data?.files;
-      setNewname(response.data.newname)
+      setNewname(response.data.newname);
+      setTaskName(response.data.taskname);
       if (!files || !Array.isArray(files)) {
         setError('Invalid response format: No files found');
         setFiles([]);
@@ -79,14 +80,12 @@ const FileModules = () => {
       }
 
       const filtered = files.filter((file) => file.assignEmail === email);
-
       if (filtered.length === 0) {
         setError('No data found');
         setFiles([]);
       } else {
         setFiles(filtered);
         setError('');
-        setPrevious(email);
       }
       setShowInput(false);
     } catch (err) {
@@ -102,28 +101,26 @@ const FileModules = () => {
     e.preventDefault();
     const selectedDate = new Date(moduleId).toDateString();
     const filtered = files.filter(file => new Date(file.createdAt).toDateString() === selectedDate);
-
     setFilteredFiles(filtered);
     setError(filtered.length === 0 ? "No files found for the selected date." : "");
+    setCurrentPage(1); // 🆕 Reset to first page on new search
   };
 
   const handlerefresh = () => {
-    if (previous) fetchFilesByEmail(previous);
+    fetchFilesByEmail(email, newModuleId);
   };
 
   useEffect(() => {
-    const email = selectedUser?.email || newId;
-    console.log(email,"emiald")
-    if (email) {
-      fetchFilesByEmail(email); 
-      setEmail(email)
-  
+    const email = selectedUser?.email || newEmail;
+    const moduleId = newModuleId;
+    setEmail(email);
+    if (email && moduleId) {
+      fetchFilesByEmail(email, moduleId);
       if (selectedUser?.email) {
         localStorage.removeItem("selectedTask");
       }
     }
-  }, [selectedUser, newId]);
-  
+  }, [selectedUser, newEmail, newModuleId]);
 
   useEffect(() => {
     if (role === 'employee') {
@@ -143,6 +140,7 @@ const FileModules = () => {
   useEffect(() => {
     if (files.length > 0) {
       setFilteredFiles(files);
+      setCurrentPage(1); // 🆕 Reset to first page when files change
     }
   }, [files]);
 
@@ -178,52 +176,48 @@ const FileModules = () => {
 
   const handlePreview = (moduleId, dayIndex) => {
     window.open(`/file-preview/${encodeURIComponent(moduleId)}/${encodeURIComponent(dayIndex)}`, '_blank');
-
   };
-  
+
+  const TaskName = ({ taskName }) => {
+    const [showFull, setShowFull] = useState(false);
+    const capitalize = (text) =>
+      text
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    const words = taskName.split(' ');
+    const isLong = words.length > 8;
+    const fullText = capitalize(taskName);
+    const shortText = words.slice(0, 8).join(' ') + '...>';
+    const short = capitalize(shortText);
+
+    return (
+      <h6 onClick={() => setShowFull(!showFull)} style={{ fontSize: '12px', cursor: 'pointer', color: 'gray' }}>
+        <strong className='text-secondary'>Task Name:</strong> {isLong && !showFull ? short : fullText}
+      </h6>
+    );
+  };
+
+  // 🆕 Pagination logic
+  const indexOfLastFile = currentPage * filesPerPage;
+  const indexOfFirstFile = indexOfLastFile - filesPerPage;
+  const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
+  const totalPages = Math.ceil(filteredFiles.length / filesPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="team-lead-interfaces container mt-4">
       {role === 'employee' ? <EmployeeSidebar /> : <Sidebar />}
-
-      <button onClick={() => window.history.back()} className="btn btn-outline-light text-primary fs-6 mb-3">
+      <button onClick={() => navigate('/employee-dashboard')} className="btn btn-outline-light text-primary fs-6 mb-3">
         <FontAwesomeIcon icon={faArrowLeft} /> Back
       </button>
 
-      <h2 className="text-secondary">File Modules</h2>
-
-      {role === 'team-lead' && (
-        <>
-          <h6 className="text-secondary">Select Teammates:</h6>
-          <table className="table table-bordered table-hover table-dark rounded shadow-sm w-50">
-            <thead className="thead-light">
-              <tr>
-                <th className="text-info">Sl no.</th>
-                <th className="text-info">Name & Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {teamMembers.length > 0 ? (
-                teamMembers.map((member, index) => (
-                  <tr key={index} onClick={() => setSelectedUser(member)} style={{ cursor: 'pointer' }}>
-                    <td>{index + 1}</td>
-                    <td>{member.name} - ({member.role === 'employee' ? 'Teammate' : member.role})</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="2" className="text-center text-muted">No team members found in your Team ID.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </>
-      )}
-
-      <p className="text-muted">Manage and review files and modules here.</p>
+      <h2 className="text-secondary fs-4">File Modules</h2>
+      <p className="text-muted" style={{ fontSize: '14px' }}>Manage and review files and modules here.</p>
 
       {!showInput ? (
-        <button onClick={handleSearchClick} className="btn btn-primary mb-3">
+        <button onClick={handleSearchClick} className="btn btn-primary mb-3" style={{ fontSize: '12px' }}>
           Search Files By Date
         </button>
       ) : (
@@ -235,64 +229,49 @@ const FileModules = () => {
 
       {error && (
         <div className="alert alert-info mx-3 w-50">
-          <button className='alert alert-info border-0' onClick={() => role === 'employee' ? fetchFilesByEmail(loggedInUserEmail) : handlerefresh()}>
-            {error} <u><i>click here to back !</i></u>
+          <button className='alert alert-info border-0' onClick={() => { navigate("/file-modules") }}>
+            {error} <u><i>Go Previous & Refresh!</i></u>
           </button>
         </div>
       )}
 
-      {!error && filteredFiles.length > 0 && (
+      {!error && currentFiles.length > 0 && (
         <div className="files-list bg-info-subtle p-3 rounded mt-4">
           <center className="text-secondary"><u><strong>Uploaded Data</strong></u></center>
 
-          <button className="btn btn-info text-dark border-1 mx-1 p-2 my-2" style={{ float: 'right' }}
-            onClick={() => role === 'employee' ? fetchFilesByEmail(loggedInUserEmail) : handlerefresh()}>
+          <button className="btn btn-info text-dark border-1 mx-1 p-2 my-2" style={{ float: 'right', fontSize: '12px' }}
+            onClick={handlerefresh}>
             Show All Data
           </button>
 
-          <h5 className="text-primary">
-            <u><strong>Files of {selectedUser?.name || newname || selectedName }:</strong></u>
+          <h5 className="text-secondary fs-6">
+            <TaskName taskName={taskName} />
+            <strong style={{ fontSize: '12px' }}> Teammate Name :  {selectedUser?.name || newname || selectedName}</strong>
           </h5>
-          <p className="text-danger"><strong>Files Count: {filteredFiles.length}</strong></p>
-          <>
-          {/* <button onClick={handleClearAll} className="btn btn-danger mb-2">
-           Clear All Data
-          </button> */}
-          <div className="table-responsive">
+          <p className="text-danger" style={{ fontSize: '12px' }}><strong>Files Count: {filteredFiles.length}</strong></p>
+
+          <div className="table-responsive" style={{ fontSize: '10px' }}>
             <table className="table table-bordered table-hover text-center mt-3">
               <thead className="table-secondary">
                 <tr>
                   <th>Sl No.</th>
-                  <th>Day/Date</th>
+                  <th>Day/Date/Time</th>
                   <th>Preview</th>
                   <th>Download</th>
-                {role==='team-lead'? <><th>Actions</th> 
-                <th>Status</th></>:''}
+                  {role === 'team-lead' && <><th>Actions</th><th>Status</th></>}
                 </tr>
               </thead>
               <tbody>
-                {filteredFiles.map((file, index) => (
+                {currentFiles.map((file, index) => (
                   <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>
-                      <strong>Day {file.dayIndex} - </strong>
+                    <td>{indexOfFirstFile + index + 1}</td>
+                    <td> <strong>Day {file.dayIndex} - </strong>
                       {new Date(file.createdAt).toLocaleString('en-GB', {
                         day: '2-digit', month: '2-digit', year: '2-digit',
                         hour: '2-digit', minute: '2-digit', hour12: true,
-                      })}
-                    </td>
-                    <td>
-                      <button onClick={() => handlePreview(file.moduleId, file.dayIndex)}
-                        className="btn btn-outline-info btn-sm text-dark">
-                        <i className="fas fa-eye"></i>
-                      </button>
-                    </td>
-                    <td>
-                      <button onClick={() => handleDownload(file.moduleId, file.dayIndex)}
-                        className="btn btn-outline-info text-dark btn-sm">
-                        <i className="fas fa-download"></i>
-                      </button>
-                    </td>
+                      })}</td>
+                    <td><button className="btn  btn-outline-info text-dark" style={{fontSize:'10px'}} onClick={() => handlePreview(file.moduleId, file.dayIndex)}>Show <IoMdEye  fontSize={20}/></button></td>
+                    <td><button className="btn btn-sm btn-outline-success text-info" onClick={() => handleDownload(file.moduleId, file.dayIndex)}><AiOutlineCloudDownload fontSize={20} /></button></td>
                     {role==='team-lead'?<><td>
                       <button type="button" className="btn btn-success btn-sm"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'accept')}>Aproved</button>
                       <button type="button" className="btn btn-danger btn-sm ms-2"  style={{fontSize:'8px'}} onClick={() => handleAction(file.moduleId, file.dayIndex, 'reject')}>Not Saticefied </button>
@@ -309,12 +288,23 @@ const FileModules = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>   
+            </table>
           </div>
-          </>
+
+          {/* 🆕 Pagination Buttons */}
+          <div className="d-flex justify-content-center mt-3">
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                className={`btn btn-sm mx-1 ${currentPage === i + 1 ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => paginate(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
         </div>
       )}
-
     </div>
   );
 };
