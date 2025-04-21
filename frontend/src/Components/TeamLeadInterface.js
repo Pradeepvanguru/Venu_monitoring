@@ -7,9 +7,12 @@ import { ProgressBar as BootstrapProgressBar } from 'react-bootstrap';
 import Sidebar from './Sidebar';
 import { notification, Dropdown, Menu } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { FaChevronDown, FaEllipsisV } from 'react-icons/fa';
+import { FaChevronDown, FaEllipsisV, FaTrash } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './TeamLeadInterface.css';
+
+// Add import at the top
+import LoadingSpinner from './LoadingSpinner';
 
 const TeamLeadInterface = () => {
     const [tasks, setTasks] = useState([]);
@@ -19,18 +22,37 @@ const TeamLeadInterface = () => {
     const [expandedTaskId, setExpandedTaskId] = useState(null);
     const navigate = useNavigate();
     const token = localStorage.getItem('userToken');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (!token) {
-            notification.warning({
-                message: "Session expired!",
-                description: "You are not logged in. Please log in to continue."
-            });
-            navigate("/");
-        }
+        let mounted = true;
+        
+        const init = async () => {
+            if (!token) {
+                notification.warning({
+                    message: "Session expired!",
+                    description: "You are not logged in. Please log in to continue."
+                });
+                navigate("/");
+                return;
+            }
+            
+            if (mounted) {
+                setIsLoading(true);
+                await fetchTasks();
+            }
+        };
+    
+        init();
+    
+        return () => {
+            mounted = false;
+            setIsLoading(false);
+        };
     }, []);
 
     const fetchTasks = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`${process.env.REACT_APP_URL}/api/tasks`, {
                 headers: {
@@ -43,28 +65,47 @@ const TeamLeadInterface = () => {
 
             const updatedTasks = await Promise.all(fetchedTasks.map(async (task) => {
                 try {
-                    const totalDays = Math.ceil(
-                        (new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24)
-                    );
-                    const countRes = await axios.get(`${process.env.REACT_APP_URL}/api/data/${task.moduleId}/count`);
-                    const submissionsCount = countRes.data.count;
-                    const calculatedProgress = (submissionsCount / totalDays) * 100 || 0;
-                    return { ...task, progress: Math.min(calculatedProgress, 100) };
+                  const start = new Date(task.startDate);
+                  const end = new Date(task.endDate);
+              
+                  let totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+              
+                  // Handle same day case
+                  if (totalDays <= 0) {
+                    if (start.getTime() === end.getTime()) {
+                      totalDays = 1;
+                    } else {
+                      console.warn(`Invalid date range for task with moduleId ${task.moduleId}`);
+                      return task;
+                    }
+                  }
+              
+                  const countRes = await axios.get(`${process.env.REACT_APP_URL}/api/data/${task.moduleId}/count`);
+                  const submissionsCount = countRes.data.count;
+                  const calculatedProgress = (submissionsCount / totalDays) * 100 || 0;
+              
+                  return {
+                    ...task,
+                    progress: Math.min(calculatedProgress, 100)
+                  };
                 } catch (error) {
-                    console.error(`Error fetching submission count for ${task.moduleId}:`, error);
-                    return task;
+                  console.error(`Error fetching submission count for ${task.moduleId}:`, error);
+                  return task;
                 }
-            }));
-
+              }));
+              
             setTasks(updatedTasks);
             setFilteredTasks(updatedTasks);
         } catch (err) {
             console.error('Error fetching tasks:', err.response ? err.response.data : err.message);
             setError('Error fetching tasks');
+        }finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
+        setIsLoading (true);
         fetchTasks();
     }, []);
 
@@ -76,21 +117,35 @@ const TeamLeadInterface = () => {
     };
 
     const handleDelete = async (taskId) => {
+        setIsLoading(true);
         try {
-            const response = await axios.delete(`${process.env.REACT_APP_URL}/api/tasks/${taskId}`, {
+          await axios.delete(`${process.env.REACT_APP_URL}/api/tasks/${taskId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setTasks(prev => prev.filter(task => task._id !== taskId));
             setFilteredTasks(prev => prev.filter(task => task._id !== taskId));
         } catch (error) {
             console.error('Delete failed:', error);
+        }finally {
+            setIsLoading(false);
         }
     };
 
-    const handleClickCard = (task) => {
-        localStorage.setItem('selectedTask',JSON.stringify(task));
-        navigate('/file-modules'); // redirect
-    };
+  // Update handleClickCard
+const handleClickCard = (task) => {
+    setIsLoading(true);
+    try {
+        localStorage.setItem('selectedTask', JSON.stringify(task));
+        navigate('/file-modules');
+    } catch (error) {
+        notification.error({
+            message: 'Error',
+            description: 'Failed to process task'
+        });
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const handleToggleExpand = (id) => {
         setExpandedTaskId(prev => (prev === id ? null : id));
@@ -104,7 +159,7 @@ const TeamLeadInterface = () => {
             // },
             {
               key: 'delete',
-              label: <span onClick={() => handleDelete(task._id)}>Delete</span>
+              label: <span onClick={() => handleDelete(task._id)}>Delete <FaTrash /></span>
             }
           ]
     );
@@ -136,12 +191,23 @@ const TeamLeadInterface = () => {
 
     return (
         <div className="team-lead-interface">
+            {isLoading && <LoadingSpinner />}
             <Sidebar />
             <div className="content-wrapper">
             <h2 className="module-heading">Tasks</h2>
-            <button onClick={handleRefresh} className="btn btn-success refresh-btn mt-0">
-                    Refresh <HiRefresh />
-                </button>
+            <button 
+                onClick={handleRefresh} 
+                className={`btn refresh-btn mt-0 ${isLoading ? 'loading' : ''}`}
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <span className="spinner">
+                        <HiRefresh className="refresh-icon spinning" />
+                    </span>
+                ) : (
+                    <>Refresh <HiRefresh className="refresh-icon" /></>
+                )}
+            </button>
                 <div>
                 <input
                     type="text"

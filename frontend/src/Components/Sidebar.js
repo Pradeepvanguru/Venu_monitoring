@@ -7,11 +7,13 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ImSpinner8 } from 'react-icons/im';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState('');
     const [profilePhoto, setProfilePhoto] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserDetails = async () => {
@@ -23,14 +25,17 @@ const Sidebar = () => {
             }
 
             try {
+                setIsLoading(true);
                 const response = await axios.get(`${process.env.REACT_APP_URL}/api/logged-user`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
                 setUserName(response.data.name);
-                setProfilePhoto(response.data.profilePhoto); // this is "uploads/filename.jpg"
+                setProfilePhoto(response.data.profilePhoto);
             } catch (error) {
                 console.error('Error fetching user:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -51,20 +56,28 @@ const Sidebar = () => {
             <div className="sidebar-header text-center">
                 <h2>Team Lead Panel</h2>
                 <div className="d-flex align-items-center justify-content-center mt-3">
-                    <img
-                        src={profilePhoto}
-                        alt="Profile"
-                        className="profile-image"
-                        style={{
-                            width: '80px',
-                            height: '80px',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            marginRight: '30px',
-                            border:'1px solid white',
-                        }}
-                    />
-                    <span className='fs-5 font-weight-semibold '>{userName || 'Loading...'}</span>
+                    {isLoading ? (
+                        <div className="loading-spinner">
+                            <ImSpinner8  fontSize={30} className="spinner-icon" />
+                        </div>
+                    ) : (
+                        <>
+                            <img
+                                src={profilePhoto}
+                                alt="Profile"
+                                className="profile-image"
+                                style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                    marginRight: '30px',
+                                    border: '1px solid white',
+                                }}
+                            />
+                            <span className='fs-5 font-weight-semibold'>{userName || 'Loading...'}</span>
+                        </>
+                    )}
                 </div>
             </div>
 

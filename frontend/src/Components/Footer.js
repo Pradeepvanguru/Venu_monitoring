@@ -7,16 +7,16 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         {/* Left Section - Company Info */}
-        <div className="footer-section">
+        {/* <div className="footer-section">
           <img src="/logo.png" alt="Company Logo" className="footer-logo" />
           <p>Your Company Name</p>
           <p>Building the future, one step at a time.</p>
-        </div>
+        </div> */}
 
         {/* Middle Section - Quick Links */}
         <div className="footer-section">
           <h4>Quick Links</h4>
-          <ul>
+          <ul className="text-secondary">
             <li><a href="/">Home</a></li>
             <li><a href="/about">About Us</a></li>
             <li><a href="/services">Services</a></li>
@@ -43,7 +43,7 @@ const Footer = () => {
 
       {/* Bottom Section - Copyright */}
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} Your Company Name. All Rights Reserved.</p>
+        <p>© {new Date().getFullYear()} VenuTeam. All Rights Reserved.</p>
       </div>
     </footer>
   );

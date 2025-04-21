@@ -1,3 +1,4 @@
+import { SlRefresh } from "react-icons/sl"; 
 import React, { useState } from 'react';
 import useFetchTask from './useFetchTask';
 import Progressbar from './progressbar';
@@ -7,7 +8,8 @@ import { format } from 'date-fns';
 import { message, notification } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaDownload, FaEye, FaLink, FaPaperPlane, FaTrash } from 'react-icons/fa'; 
+import { FaDownload, FaEye, FaLink,  FaTrash } from 'react-icons/fa'; 
+import Loader from './LoadingSpinner'
 
 const TaskModules = () => {
   const navigate = useNavigate();
@@ -105,18 +107,33 @@ const TaskModules = () => {
     window.location.reload();
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div><Loader /></div>;
   if (error) return <div>Error: {error.message}</div>;
   if (!task) return <div>No task found for this employee.</div>;
 
   const formattedStartDate = format(new Date(task.startDate), 'dd MMM yyyy');
-  const formattedEndDate = format(new Date(task.endDate), 'dd MMM yyyy');
-  const totalDays = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentDays = [...Array(totalDays)].slice(indexOfFirstRecord, indexOfLastRecord);
+const formattedEndDate = format(new Date(task.endDate), 'dd MMM yyyy');
 
-  const totalPages = Math.ceil(totalDays / recordsPerPage);
+let totalDays = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
+
+// Handle same day case
+if (totalDays <= 0) {
+  if (formattedStartDate === formattedEndDate) {
+    totalDays = 1;
+  } else {
+    notification.info({ message: 'Invalid date range.' });
+    return;
+  }
+}
+
+const indexOfLastRecord = currentPage * recordsPerPage;
+const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+
+// Create array representing each day (for example: [0, 1, 2, ...])
+const allDays = [...Array(totalDays).keys()];
+const currentDays = allDays.slice(indexOfFirstRecord, indexOfLastRecord);
+
+const totalPages = Math.ceil(totalDays / recordsPerPage);
 
   const handleDelete = async (dayIndex) => {
     if (window.confirm('Are you sure you want to delete?')) {
@@ -185,7 +202,7 @@ const TaskModules = () => {
           <strong className="text-primary">Start Date: <>{start}</></strong><br></br>
           <strong className="text-danger">End Date: <>{end}</></strong><br></br>
           <strong className="text-dark ">Project Documents:  <><FaEye  onClick={()=>{handleview()}}/> <FaDownload onClick={()=>{handleDownload()}} /></></strong><br></br>
-          <p><i>No matter how big or small the task, every step forward brings you closer to your goals. Stay focused, believe in your abilities, and keep pushing forward. Progress is built through consistency and determination. You’ve got the strength within you to finish strong—just take it one task at a time.</i></p>
+          <p><i>Progress is built through consistency and determination. You’ve got the strength within you to finish strong—just take it one task at a time.</i></p>
           </div>
         </div>
 
@@ -194,7 +211,7 @@ const TaskModules = () => {
         </div>
 
         <div className="employee-task-table-wrapper">
-          <button className="employee-task-refresh btn btn-info text-dark border-1 mx-1 p-2 my-2" style={{ float: 'right' }} onClick={handlerefresh}>Refresh</button>
+          <button className="employee-task-refresh btn btn-info text-dark border-1 mx-1 p-2 my-2" style={{ float: 'right' }} onClick={handlerefresh}>Refresh <SlRefresh /></button>
           {/* <button onClick={handleClearAll} className="employee-task-clear btn btn-danger mb-2">Clear All Data</button> */}
 
           <table className="employee-task-table" style={{fontSize:'10px'}}>

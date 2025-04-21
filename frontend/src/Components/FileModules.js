@@ -26,6 +26,7 @@ const FileModules = () => {
   const [taskName, setTaskName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false); // ⬅️ Add this at the top
 
   const token = localStorage.getItem('userToken');
   const role = localStorage.getItem('userRole');
@@ -65,6 +66,7 @@ const FileModules = () => {
   }, [selectedTask]);
 
   const fetchFilesByEmail = async (email, moduleId) => {
+    setLoading(true);
     try {
       const response = await axios.get(`${process.env.REACT_APP_URL}/api/datafetch/${email}?moduleId=${moduleId}`, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
@@ -93,6 +95,9 @@ const FileModules = () => {
       setError('No files uploaded for this user.');
       setFiles([]);
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   const handleSearchClick = () => setShowInput(true);
@@ -106,8 +111,14 @@ const FileModules = () => {
     setCurrentPage(1); // 🆕 Reset to first page on new search
   };
 
-  const handlerefresh = () => {
-    fetchFilesByEmail(email, newModuleId);
+  const handlerefresh = async () => {
+    setLoading(true); // show loader
+    try {
+      await fetchFilesByEmail(newEmail, newModuleId); // only reloads table data
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false); // hide loader
   };
 
   useEffect(() => {
@@ -205,11 +216,12 @@ const FileModules = () => {
   const totalPages = Math.ceil(filteredFiles.length / filesPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
+// className="btn btn-outline-light text-primary fs-6 mb-3"
   return (
     <div className="team-lead-interfaces container mt-4">
       {role === 'employee' ? <EmployeeSidebar /> : <Sidebar />}
-      <button onClick={() => navigate('/employee-dashboard')} className="btn btn-outline-light text-primary fs-6 mb-3">
+      <button onClick={() => navigate(role==='employee'?'/employee-dashboard':'/team-lead-interface')} className="btn btn-outline-light text-primary fs-6 mb-3">
+      
         <FontAwesomeIcon icon={faArrowLeft} /> Back
       </button>
 
@@ -267,7 +279,7 @@ const FileModules = () => {
                     <td>{indexOfFirstFile + index + 1}</td>
                     <td> <strong>Day {file.dayIndex} - </strong>
                       {new Date(file.createdAt).toLocaleString('en-GB', {
-                        day: '2-digit', month: '2-digit', year: '2-digit',
+                        weekday: 'long', day: '2-digit', month: '2-digit', year: '2-digit',
                         hour: '2-digit', minute: '2-digit', hour12: true,
                       })}</td>
                     <td><button className="btn  btn-outline-info text-dark" style={{fontSize:'10px'}} onClick={() => handlePreview(file.moduleId, file.dayIndex)}>Show <IoMdEye  fontSize={20}/></button></td>

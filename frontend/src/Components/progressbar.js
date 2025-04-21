@@ -1,3 +1,6 @@
+import { DiCodeigniter } from "react-icons/di"; 
+import { GiPartyPopper } from "react-icons/gi"; 
+import { TbJewishStar } from "react-icons/tb"; 
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { ProgressBar as BootstrapProgressBar } from 'react-bootstrap';
@@ -21,8 +24,18 @@ const TaskProgressBar = ({ moduleID }) => {
         const response = await axios.get(`${process.env.REACT_APP_URL}/api/tasks/${moduleID}`);
         const task = response.data;
 
-        // Calculate total days between start date and deadline
-        const daysBetween = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
+                // Calculate total days between start date and deadline
+          let daysBetween = Math.ceil((new Date(task.endDate) - new Date(task.startDate)) / (1000 * 60 * 60 * 24));
+
+          // Handle same day case
+          if (daysBetween <= 0) {
+            if (new Date(task.endDate).getTime() === new Date(task.startDate).getTime()) {
+              daysBetween = 1;
+            } else {
+              return;
+            }
+          }
+
         setTotalDays(daysBetween);
 
          // Fetch accepted submission count
@@ -81,11 +94,11 @@ const TaskProgressBar = ({ moduleID }) => {
   }
 
   return (
-    <div className="progress-bar-container" style={{fontSize:'10px'}}>
+    <div className="progress-bar-container" style={{fontSize:'12px'}}>
       {taskData ? (
         <div>
           <p>Days: {daysSubmitted}/{totalDays}</p>
-          <div className="p-3">
+          <div className="py-1">
             <BootstrapProgressBar now={progress} label={`${Math.round(progress)}%`} />
             <p>{`Progress: ${Math.round(progress)}%`}</p>
           </div>
@@ -93,7 +106,7 @@ const TaskProgressBar = ({ moduleID }) => {
           {/* Show congratulatory message when progress reaches 100% */}
           {progress === 100 && (
             <div className="congratulations-message">
-              <h4>Congratulations! Your task is completed!</h4>
+              <h4 style={{ fontSize: "0.9rem", fontWeight:'500'}}> <DiCodeigniter /><GiPartyPopper /> Congratulations! Your task is completed! <GiPartyPopper /><DiCodeigniter /></h4>
               <p>Keep going, you're doing great!</p>
             </div>
           )}
@@ -109,6 +122,7 @@ const TaskProgressBar = ({ moduleID }) => {
             background-color: #4CAF50;
             color: white;
             padding: 10px;
+            font-size: 0.8rem;
             border-radius: 5px;
             margin-top: 20px;
             text-align: center;

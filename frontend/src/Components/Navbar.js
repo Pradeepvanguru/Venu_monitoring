@@ -1,3 +1,6 @@
+import { RiContactsLine } from "react-icons/ri"; 
+import { BiBulb } from "react-icons/bi"; 
+import { GoHome } from "react-icons/go"; 
 // src/Components/Navbar.js
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -10,9 +13,9 @@ const Navbar = ({ isAuthenticated, onLogout }) => {
                 <Link to="/">Venu Team</Link>
             </div>
             <div className="navbar-links">
-                <Link to="/">Home</Link>
-                <Link to="/about">About</Link>
-                <Link to="/contact">Contact</Link>
+                <Link to="/"><GoHome /> Home</Link>
+                <Link to="/about"> <BiBulb /> About</Link>
+                <Link to="/contact"><RiContactsLine /> Contact</Link>
                 {!isAuthenticated && (
                     <div className="navbar-dropdown">
                         <span>Login/Signup</span>
